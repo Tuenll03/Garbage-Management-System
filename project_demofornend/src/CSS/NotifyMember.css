@@ -1,0 +1,323 @@
+/* NotifyMember.css */
+
+.notify-page-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: 'Sarabun', 'Kanit', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notify-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.notify-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.notify-page-title {
+  font-family: 'Kanit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 8px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.back-home-button:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Card Container */
+.notify-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Premium Card (Matching the Uploaded Image) */
+.notify-status-card {
+  background-color: #ffffff;
+  border-radius: 28px;
+  padding: 35px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2.5px solid #e2e8f0;
+}
+
+.notify-status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+}
+
+/* Approved Card Color Theme (Matching the Mint Green Border in Image) */
+.notify-status-card.approved {
+  border-color: #d1fae5; /* สีขอบเขียวมิ้นต์อ่อนๆ แบบในรูปภาพ */
+}
+
+/* Pending Card Color Theme */
+.notify-status-card.pending {
+  border-color: #fef3c7; /* สีเหลืองทองสว่าง */
+}
+
+/* Status section inside Card */
+.status-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.status-label-top {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2em; /* การขยายระยะช่องไฟแบบในรูปภาพ */
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.status-badge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.status-title-text {
+  font-family: 'Kanit', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.status-title-text.approved {
+  color: #107c41; /* สีเขียวเหมือนในรูปภาพ */
+}
+
+.status-title-text.pending {
+  color: #d97706; /* สีเหลืองทองเข้ม */
+}
+
+.status-badge-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-badge-icon.approved {
+  color: #107c41;
+}
+
+.status-badge-icon.pending {
+  color: #d97706;
+}
+
+/* Info Grid Styling */
+.notify-info-divider {
+  border: 0;
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 20px 0;
+}
+
+.notify-card-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+  text-align: left;
+  background-color: #f8fafc;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+}
+
+@media (max-width: 600px) {
+  .notify-card-details-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
+.info-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-grid-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.info-grid-value {
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+
+/* Bottom Note */
+.notify-card-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.notify-footer-icon {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+}
+
+/* Empty State */
+.notify-empty {
+  background-color: #ffffff;
+  border-radius: 28px;
+  padding: 60px 40px;
+  text-align: center;
+  border: 2px solid #e2e8f0;
+}
+
+.notify-empty-icon {
+  width: 60px;
+  height: 60px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.notify-empty-title {
+  font-family: 'Kanit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 8px 0;
+}
+
+.notify-empty-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.invoice-notification-card {
+  background-color: #ffffff;
+  border-radius: 28px;
+  padding: 24px 35px; /* ลดความสูงของ Padding บน-ล่าง จาก 35px -> 24px */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 2.5px solid #e2e8f0;
+  text-align: center;
+  margin: 0 0 24px 0;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.invoice-notification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+}
+
+.invoice-notify-header-subtitle {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ea580c; /* สีส้มอมแดงสวยงามสำหรับสับไตเติลเตือนความจำ */
+  margin: 0 0 16px 0; /* ลดช่องว่างล่างลงจาก 24px -> 16px */
+}
+
+.invoice-notify-divider {
+  border: 0;
+  height: 1px;
+  background-color: #f1f5f9;
+  margin: 0 0 16px 0; /* ลดช่องว่างล่างลงจาก 24px -> 16px */
+}
+
+.invoice-notify-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  text-align: center;
+}
+
+.invoice-notify-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.invoice-notify-amount-val {
+  font-family: 'Kanit', sans-serif;
+  font-size: 32px; /* ลดขนาดตัวเลขยอดเงินจาก 38px -> 32px */
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px; /* ลดความสูงลงเพื่อให้กระชับขึ้น */
+}
+
+.invoice-notify-date-val {
+  font-family: 'Kanit', sans-serif;
+  font-size: 20px; /* ลดขนาดตัวเลขวันที่จาก 24px -> 20px */
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px; /* ลดความสูงลงเพื่อให้กระชับขึ้น */
+}
+
+@media (max-width: 480px) {
+  .invoice-notify-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .invoice-notify-date-val {
+    line-height: 1.2;
+    height: auto;
+  }
+  .invoice-notify-amount-val {
+    height: auto;
+  }
+}
+
+

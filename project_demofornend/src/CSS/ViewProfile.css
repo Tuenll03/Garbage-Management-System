@@ -1,0 +1,407 @@
+.viewprofile-wrapper {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: 'Sarabun', 'Inter', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.viewprofile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.profile-title-header {
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.profile-title-header h2 {
+  font-family: 'Kanit', sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Card Styling */
+.profile-section-card {
+  background-color: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  padding: 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 16px;
+}
+
+.card-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon-container {
+  width: 38px;
+  height: 38px;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #107c41;
+}
+
+.card-icon-container svg {
+  width: 20px;
+  height: 20px;
+}
+
+.card-title {
+  font-family: 'Kanit', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-verified {
+  background-color: #e6f9f0;
+  color: #107c41;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #c2ebd6;
+  letter-spacing: 0.5px;
+}
+
+/* Buttons */
+.card-actions-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-edit-profile, .btn-save-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #107c41;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-profile:hover, .btn-save-profile:hover {
+  background-color: #0c6233;
+}
+
+.btn-edit-profile svg, .btn-save-profile svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-cancel-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-profile:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-cancel-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-service:hover {
+  background-color: #fef2f2;
+}
+
+.btn-cancel-service svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Grid layout for fields */
+.fields-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
+  column-gap: 30px;
+}
+
+.fields-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: 20px;
+  column-gap: 20px;
+}
+
+.field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.field-label svg {
+  width: 14px;
+  height: 14px;
+  color: #94a3b8;
+}
+
+.field-value {
+  font-size: 16px;
+  color: #0f172a;
+  font-weight: 600;
+  margin: 0;
+  min-height: 24px;
+}
+
+/* Edit form fields inputs */
+.field-input, .field-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  color: #1e293b;
+  box-sizing: border-box;
+  background-color: #f8fafc;
+  transition: border-color 0.2s;
+}
+
+.field-input:focus, .field-select:focus {
+  outline: none;
+  border-color: #107c41;
+  background-color: #ffffff;
+}
+
+/* Service location accent lines */
+.service-sub-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  margin-top: 10px;
+}
+
+.accent-line-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #107c41;
+}
+
+.accent-line {
+  width: 40px;
+  height: 3px;
+  background-color: #107c41;
+  border-radius: 2px;
+}
+
+/* Special alert box for detail and landmarks */
+.detail-alert-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  text-align: left;
+}
+
+.detail-icon-box {
+  width: 42px;
+  height: 42px;
+  background-color: #ffffff;
+  border: 1px solid #c2ebd6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #107c41;
+  flex-shrink: 0;
+}
+
+.detail-icon-box svg {
+  width: 20px;
+  height: 20px;
+}
+
+.detail-content-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.detail-content-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-content-value {
+  font-size: 15px;
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.detail-content-box textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Meta texts for service card values */
+.meta-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Banner errors */
+.message-alert {
+  max-width: 1160px;
+  margin: 0 auto 25px auto;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.message-alert.error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.message-alert.success {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Service detail editing textarea */
+.service-detail-textarea {
+  width: 100%;
+  min-height: 80px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  margin-top: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #334155;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.service-detail-textarea:focus {
+  outline: none;
+  border-color: #107c41;
+  box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.1);
+}
+
+/* Back Home Button in Navbar */
+.back-home-button {
+  background-color: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+  box-sizing: border-box;
+}
+
+.back-home-button:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
