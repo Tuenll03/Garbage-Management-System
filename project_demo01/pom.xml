@@ -45,6 +45,24 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<!-- JasperReports Core -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.20.0</version>
+		</dependency>
+		<!-- PDF rendering support (ใช้ iText ในการช่วยแปลงเป็น PDF) -->
+		<dependency>
+			<groupId>com.lowagie</groupId>
+			<artifactId>itext</artifactId>
+			<version>2.1.7</version>
+		</dependency>
+		<!-- ICU4J for number/currency spelling out in Thai (RuleBasedNumberFormat) -->
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>74.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

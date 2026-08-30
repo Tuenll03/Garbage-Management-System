@@ -1,0 +1,215 @@
+/* ListApprove.css */
+
+.list-approve-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.status-filter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 32px 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: #ffffff;
+  cursor: pointer;
+  outline: none;
+  min-width: 160px;
+  transition: border-color 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+.status-select:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
+}
+
+/* Table Card Wrapper */
+.officer-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+.officer-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.officer-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  letter-spacing: 0.5px;
+}
+
+/* ล็อคความกว้างของคอลัมน์ไม่ให้ขยับไปมาเมื่อสลับฟิลเตอร์ */
+.officer-table th:nth-child(1) { width: 20%; }
+.officer-table th:nth-child(2) { width: 25%; }
+.officer-table th:nth-child(3) { width: 20%; }
+.officer-table th:nth-child(4) { width: 20%; }
+.officer-table th:nth-child(5) { width: 15%; text-align: right; }
+
+.officer-table td {
+  padding: 18px 24px;
+  font-size: 14px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+/* Column Specific Font Weight */
+.officer-table tr td:nth-child(1) {
+  font-family: monospace;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.officer-table tr td:nth-child(2) {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Status Badges */
+.status-badge-officer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.status-badge-officer.pending {
+  background-color: #fef3c7; /* Soft yellow */
+  color: #b45309;
+}
+
+.status-badge-officer.approved {
+  background-color: #d1fae5; /* Soft green */
+  color: #047857;
+}
+
+.status-badge-officer.rejected {
+  background-color: #fee2e2; /* Soft red */
+  color: #b91c1c;
+}
+
+/* Action Links */
+.action-detail-link {
+  color: #15803d;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.action-detail-link:hover {
+  color: #166534;
+}
+
+/* Table Footer with Pagination */
+.table-footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.entries-count-text {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pagination-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-nav-btn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-nav-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.page-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-num-btn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.page-num-btn.active {
+  background-color: #15803d;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+.page-num-btn:hover:not(.active) {
+  background-color: #f1f5f9;
+}

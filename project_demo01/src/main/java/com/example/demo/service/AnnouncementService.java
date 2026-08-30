@@ -29,7 +29,7 @@ public class AnnouncementService {
     public String createAnnouncement(@NonNull Announcement announcement) {
         try {
             announcementRepository.save(announcement);
-            return "Announcement created successfully";
+            return "success";
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return "error";
@@ -56,7 +56,7 @@ public class AnnouncementService {
             );
 
             announcementRepository.save(existingAnnouncement);
-            return "Announcement updated successfully";
+            return "success";
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return "error";
@@ -66,7 +66,7 @@ public class AnnouncementService {
     public String deleteAnnouncement(@NonNull Integer id) {
         try {
             announcementRepository.deleteById(id);
-            return "Announcement deleted successfully";
+            return "success";
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return "error";

@@ -24,6 +24,11 @@ public class MemberController {
         return memberService.getMemberById(id);
     }
 
+    @GetMapping("/citizenId/{citizenId}")
+    public Member getMemberByCitizenId(@PathVariable @NonNull String citizenId) {
+        return memberService.getMemberByCitizenId(citizenId);
+    }
+
     @PostMapping
     public String createMember(@RequestBody @NonNull Member member) {
         String result = memberService.createMember(member);

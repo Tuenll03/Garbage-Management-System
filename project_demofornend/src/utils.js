@@ -150,7 +150,48 @@ const utils = {
     const monthIndex = parseInt(parts[1], 10) - 1;
     const year = parts[2];
     return `${day} ${MONTHS[monthIndex] || ''} ${year}`;
-  }
+  },
+  getInvoiceMonthYear: (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return '';
+    const monthIndex = parseInt(parts[1], 10) - 1;
+    const yearBE = parseInt(parts[0], 10) + 543;
+    const MONTHS = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    return `${MONTHS[monthIndex]} ${yearBE}`;
+  },
+  formatShortThaiDate: (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const day = parseInt(parts[0], 10);
+    const monthIndex = parseInt(parts[1], 10) - 1;
+    const year = parts[2];
+    const SHORT_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    return `${day} ${SHORT_MONTHS[monthIndex] || ''} ${year}`;
+  },
+
+  formatDate: (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const yearCE = parseInt(parts[0], 10);
+    const month = parts[1];
+    const day = parts[2];
+    const yearBE = yearCE + 543; // แปลง ค.ศ. เป็น พ.ศ.
+    return `${day}/${month}/${yearBE}`;
+  },
+  cleanDetail: (value) => {
+    if (!value) return '';
+    return value.replace(/[^ก-ฮะ-์a-zA-Z0-9\s()\-]/g, '').substring(0, 255);
+  },
+  cleanTopic: (value) => {
+    if (!value) return '';
+    return value.replace(/[^ก-ฮะ-์a-zA-Z0-9\s()\-]/g, '').substring(0, 50);
+  },
+
+
+
 }
 
 export default utils;

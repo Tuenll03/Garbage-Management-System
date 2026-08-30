@@ -3,13 +3,27 @@ package com.example.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.demo.repository.InvoiceRepository;
 import com.example.demo.repository.ServiceRepository;
+
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
+
 import com.example.demo.entity.Invoice;
 import com.example.demo.entity.Service;
 import org.springframework.lang.NonNull;
+
+import java.util.HashMap;
 import java.util.List;
 import java.time.LocalDate;
 import org.springframework.scheduling.annotation.Scheduled;
 import java.time.temporal.TemporalAdjusters;
+
+import java.sql.Connection;
+import javax.sql.DataSource;
+import java.util.Map;
+import java.io.InputStream;
 
 @org.springframework.stereotype.Service
 public class InvoiceService {
@@ -20,18 +34,21 @@ public class InvoiceService {
     @Autowired
     private ServiceRepository serviceRepository;
 
+    @Autowired
+    private DataSource dataSource;
+
     public List<Invoice> getAllInvoice() {
         return invoiceRepository.findAll();
     }
 
-    // public Invoice getInvoiceById(Integer id) {
-    // try {
-    // return invoiceRepository.findById(id).orElse(null);
-    // } catch (Exception e) {
-    // System.err.println(e.getMessage());
-    // return null;
-    // }
-    // }
+    public Invoice getInvoiceById(@NonNull Integer id) {
+        try {
+            return invoiceRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
 
     public List<Invoice> getInvoicesByMemberId(@NonNull Integer memberId) {
         return invoiceRepository.findByService_Member_MemberId(memberId);
@@ -39,7 +56,7 @@ public class InvoiceService {
 
     // ทำงานอัตโนมัติ ทุกๆ 10 วินาที เพื่อสำหรับการทดสอบ (ย้ายกลับเป็น "0 0 0 1 * ?"
     // เมื่อรันโปรดักชันจริง)
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void autoGenerateMonthlyInvoices() {
         try {
             List<Service> services = serviceRepository.findAll();
@@ -95,35 +112,27 @@ public class InvoiceService {
         }
     }
 
-    // public String updateInvoice(Integer id, Invoice invoice) {
-    // try {
-    // Invoice existingInvoice = invoiceRepository.findById(id).orElse(null);
-    // if (existingInvoice == null) {
-    // return "Invoice not found";
-    // }
+    public byte[] generateInvoicePdf(int invoiceId) throws Exception {
 
-    // existingInvoice.setInvoiceNumber(
-    // invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber()
-    // : existingInvoice.getInvoiceNumber());
-    // existingInvoice.setInvoiceDate(
-    // invoice.getInvoiceDate() != null ? invoice.getInvoiceDate() :
-    // existingInvoice.getInvoiceDate());
-    // existingInvoice.setDueDate(
-    // invoice.getDueDate() != null ? invoice.getDueDate() :
-    // existingInvoice.getDueDate());
-    // existingInvoice.setStatus(
-    // invoice.getStatus() != null ? invoice.getStatus() :
-    // existingInvoice.getStatus());
-    // existingInvoice.setTotalAmount(
-    // invoice.getTotalAmount() > 0 ? invoice.getTotalAmount() :
-    // existingInvoice.getTotalAmount());
+        // 1. อ่านไฟล์แบบฟอร์มสำเร็จรูปจาก resources/reports/
+        InputStream reportStream = getClass().getResourceAsStream("/reports/demoInvoice.jrxml");
 
-    // invoiceRepository.save(existingInvoice);
-    // return "Invoice updated successfully";
-    // } catch (Exception e) {
-    // System.err.println(e.getMessage());
-    // return "error";
-    // }
-    // }
+        // Compile .jrxml file before filling it
+        JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+
+        // 2. นำไอดีบิลใส่เป็นพารามิเตอร์ส่งไปให้ SQL ใน Jasper
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("BILL_ID", invoiceId);
+
+        // 3. ใช้คำสั่ง try-with-resources เพื่อขอสายต่อ DB
+        // และปิดสายคืนให้อัตโนมัติเมื่อทำเสร็จ
+        try (Connection conn = dataSource.getConnection()) {
+
+            // สั่งกรอกข้อมูล และแปลงเป็น PDF
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
+
+            return JasperExportManager.exportReportToPdf(jasperPrint);
+        }
+    }
 
 }

@@ -21,6 +21,14 @@ public class OfficerService {
         return officerRepository.findById(id).orElse(null);
     }
 
+    public DocumentOfficer getOfficerByCitizenId(@NonNull String citizenId) {
+        try {
+            return officerRepository.findByCitizenId(citizenId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public String createOfficer(@NonNull DocumentOfficer officer) {
         try {
             officerRepository.save(officer);
@@ -40,11 +48,15 @@ public class OfficerService {
             }
 
             // อัปเดตทับเฉพาะฟิลด์ที่ส่งมาจากหน้าบ้าน (ถ้าไม่ส่งมาให้ใช้ค่าเดิม)
-            mngofficer
-                    .setFirstName(officer.getFirstName() != null ? officer.getFirstName() : mngofficer.getFirstName());
+            mngofficer.setFirstName(officer.getFirstName() != null ? officer.getFirstName() : mngofficer.getFirstName());
             mngofficer.setLastName(officer.getLastName() != null ? officer.getLastName() : mngofficer.getLastName());
+            mngofficer.setPrefix(officer.getPrefix() != null ? officer.getPrefix() : mngofficer.getPrefix());
+            mngofficer.setPosition(officer.getPosition() != null ? officer.getPosition() : mngofficer.getPosition());
+            mngofficer.setPassword(officer.getPassword() != null ? officer.getPassword() : mngofficer.getPassword());
+            mngofficer.setCitizenId(officer.getCitizenId() != null ? officer.getCitizenId() : mngofficer.getCitizenId());
+            mngofficer.setStatus(officer.getStatus() != null ? officer.getStatus() : mngofficer.getStatus());
 
-            // บันทึกตัว mngofficer (ที่มีฟิลด์อื่น ๆ เช่น password ครบถ้วนอยู่แล้ว)
+            // บันทึกตัว mngofficer (ที่มีฟิลด์อื่น ๆ ครบถ้วนอยู่แล้ว)
             officerRepository.save(mngofficer);
 
             return "Officer updated successfully";

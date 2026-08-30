@@ -24,6 +24,11 @@ public class OfficerController {
         return officerService.getOfficerById(id);
     }
 
+    @GetMapping("/citizenId/{citizenId}")
+    public DocumentOfficer getOfficerByCitizenId(@PathVariable @NonNull String citizenId) {
+        return officerService.getOfficerByCitizenId(citizenId);
+    }
+
     @PostMapping
     public String createOfficer(@RequestBody @NonNull DocumentOfficer officer) {
         String result = officerService.createOfficer(officer);

@@ -25,6 +25,14 @@ public class AdminService {
         }
     }
 
+    public Admin getAdminByCitizenId(@NonNull String citizenId) {
+        try {
+            return adminRepository.findByCitizenId(citizenId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public String createAdmin(@NonNull Admin admin) {
         try {
             adminRepository.save(admin);

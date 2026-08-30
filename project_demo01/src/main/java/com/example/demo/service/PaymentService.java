@@ -51,7 +51,10 @@ public class PaymentService {
             }
 
             // 1. ตั้งค่าวันที่ชำระเงินเป็นปัจจุบัน
-            payment.setPaymentDate(LocalDate.now());
+            if (payment.getPaymentDate() == null) {
+                payment.setPaymentDate(LocalDate.now());
+            }
+
             payment.setInvoice(invoice);
 
             // 2. บันทึกประวัติการจ่ายเงิน (Payment)

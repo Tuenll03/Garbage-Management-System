@@ -74,14 +74,14 @@ function Login({ onNavigate }) {
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('citizenId', utils.cleanCitizenId(citizenId));
         sessionStorage.setItem('userRole', role);
-        
+
         let targetPage = 'homemember';
         if (role === 'Officer') {
-          targetPage = 'homememberofficer';
+          targetPage = 'homeOfficer';
         } else if (role === 'Admin') {
-          targetPage = 'homememberadmin';
+          targetPage = 'homeAdmin';
         }
-        
+
         setTimeout(() => {
           onNavigate(targetPage);
         }, 1000);

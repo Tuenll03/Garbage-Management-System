@@ -234,7 +234,93 @@ const validate = {
         if (detail.length < 15) {
             return "กรุณากรอกรายละเอียด 15 ตัวอักษรขึ้นไป";
         }
+    },
 
+    manageAnnouncements: (
+        topic,
+        detail,
+        type,
+        date
+    ) => {
+        if (!topic) {
+            return "กรุณากรอกหัวข้อ";
+        }
+
+        if (topic.length < 2 || topic.length > 50) {
+            return "กรุณากรอกหัวข้อ 2-50 ตัวอักษร";
+        }
+
+        if (!date) {
+            return "กรุณากรอกวันที่";
+        }
+
+        const datePattern = /^(\d{2})-(\d{2})-(\d{4})$/;
+        const match = date.match(datePattern);
+        if (!match) {
+            return "วันเดือนปีเกิดต้องอยู่ในรูปแบบ วัน-เดือน-ปี พ.ศ. (เช่น 14-05-2564)";
+        }
+
+        const day = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10);
+        const yearBE = parseInt(match[3], 10);
+        const yearCE = yearBE - 543;
+
+        const birthDate = new Date(yearCE, month - 1, day);
+        if (
+            birthDate.getFullYear() !== yearCE ||
+            birthDate.getMonth() !== month - 1 ||
+            birthDate.getDate() !== day
+        ) {
+            return "วันเดือนปีเกิดไม่ถูกต้อง";
+        }
+
+        if (!type) {
+            return "กรุณากรอกประเภท";
+        }
+
+        if (!detail) {
+            return "กรุณากรอกรายละเอียด";
+        }
+
+        if (detail.length < 15) {
+            return "กรุณากรอกรายละเอียด 15 ตัวอักษรขึ้นไป";
+        }
+
+
+
+
+    },
+
+    vlaidateAddOfficer: (
+        citizenId,
+        position,
+        firstName,
+        lastName,
+        password,
+
+    ) => {
+
+        const cleanedId = citizenId ? citizenId.replace(/\D/g, '') : '';
+        if (!cleanedId || !cleanedId.match(/^\d{13}$/)) {
+            return "กรุณากรอกข้อมูล เลขประจำตัวประชาชน";
+        }
+
+
+        if (!position || position.length < 2 || position.length > 50) {
+            return "กรุณากรอกตำแหน่ง";
+        }
+
+        if (!firstName || firstName.length < 2 || firstName.length > 50) {
+            return "กรุณากรอกชื่อ";
+        }
+
+        if (!lastName || lastName.length < 2 || lastName.length > 50) {
+            return "กรุณากรอกนามสกุล";
+        }
+
+        if (!password || password.length < 2 || password.length > 50) {
+            return "กรุณากรอกรหัสผ่าน";
+        }
 
 
     }

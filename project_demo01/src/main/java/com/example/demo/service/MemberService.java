@@ -25,6 +25,14 @@ public class MemberService {
         }
     }
 
+    public Member getMemberByCitizenId(@NonNull String citizenId) {
+        try {
+            return memberRepository.findByCitizenId(citizenId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public String createMember(@NonNull Member member) {
         try {
             memberRepository.save(member);

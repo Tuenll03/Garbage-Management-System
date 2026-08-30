@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="demoInvoice" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="40" bottomMargin="40" uuid="f6156858-1240-4a78-b910-f3fa829eb8bf">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="garbage"/>
+	<parameter name="BILL_ID" class="java.lang.Integer"/>
+	<queryString language="SQL">
+		<![CDATA[select  
+inv.invoice_number ,
+inv.status,
+inv.invoice_date,
+pay.amount_paid,
+pay.payment_date,
+pay.payment_method,
+s.service_id,
+s.service_type,
+s.location_house_number,
+s.location_village_no,
+s.location_village_name,
+m.registered_subdistrict,
+m.registered_district,
+m.registered_province,
+m.prefix,
+m.first_name,
+m.last_name
+From invoice inv
+Left Join payment pay ON inv.invoice_id = pay.invoice_id
+Left Join service s ON inv.service_id = s.service_id
+Left Join member m ON s.member_id = m.member_id
+Where inv.invoice_id = $P{BILL_ID} And inv.status ='ชำระเงินแล้ว']]>
+	</queryString>
+	<field name="invoice_number" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="invoice_date" class="java.sql.Date"/>
+	<field name="amount_paid" class="java.lang.Integer"/>
+	<field name="payment_date" class="java.sql.Date"/>
+	<field name="payment_method" class="java.lang.String"/>
+	<field name="service_id" class="java.lang.Integer"/>
+	<field name="service_type" class="java.lang.String"/>
+	<field name="location_house_number" class="java.lang.String"/>
+	<field name="location_village_no" class="java.lang.String"/>
+	<field name="location_village_name" class="java.lang.String"/>
+	<field name="registered_subdistrict" class="java.lang.String"/>
+	<field name="registered_district" class="java.lang.String"/>
+	<field name="registered_province" class="java.lang.String"/>
+	<field name="prefix" class="java.lang.String"/>
+	<field name="first_name" class="java.lang.String"/>
+	<field name="last_name" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="125" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="38" forecolor="#0F172A" uuid="463e9564-c650-48c0-a45c-acb016133c23"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="28" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เทศบาลทุ่งหัวช้าง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="38" width="300" height="26" forecolor="#334155" uuid="a45c6501-1240-4a78-b910-f3fa829eb8bf"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<text><![CDATA[กองคลัง งานผลประโยชน์และกิจการพาณิชย์]]></text>
+			</staticText>
+			<rectangle radius="12">
+				<reportElement x="345" y="0" width="170" height="32" backcolor="#E6F4EA" uuid="00974a97-e756-4603-a7ce-4fa17d92ff10"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<ellipse>
+				<reportElement x="358" y="12" width="8" height="8" backcolor="#15803D" uuid="e1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</ellipse>
+			<staticText>
+				<reportElement x="372" y="0" width="140" height="32" forecolor="#15803D" uuid="00974a97-e756-4603-a7ce-4fa17d92ff11"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ชำระเงินเรียบร้อยแล้ว]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="240" y="38" width="275" height="26" forecolor="#1E293B" uuid="d4a7eea1-f694-4584-be33-713d080be509"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["เลขที่ใบเสร็จ: " + $F{invoice_number}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="64" width="315" height="26" forecolor="#1E293B" uuid="1ba49f10-5b8a-4406-89a4-36ae2cdf6707"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["วันที่ออกบิล: " + ($F{invoice_date} != null ? new java.text.SimpleDateFormat("d MMMM yyyy", new java.util.Locale("th", "TH")).format($F{invoice_date}) : "-")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="90" width="315" height="28" forecolor="#0F172A" uuid="71fa7de7-c512-4914-a547-e00e5aa61aec"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="20" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["วันที่ชำระ: " + ($F{payment_date} != null ? new java.text.SimpleDateFormat("d MMMM yyyy", new java.util.Locale("th", "TH")).format($F{payment_date}) : "-")]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="120" width="515" height="1" forecolor="#CBD5E1" uuid="e00e5aa6-1aec-4a5c-acb0-16133c234567"/>
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="200" splitType="Stretch">
+			<rectangle radius="16">
+				<reportElement x="0" y="10" width="265" height="180" backcolor="#F8FAFC" uuid="c731eea8-8151-4967-bfe5-d4737a0846f7"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#CBD5E1"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="16" y="22" width="235" height="24" forecolor="#334155" uuid="39424e0a-5a91-448f-9c49-3a587fbadcb2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ข้อมูลผู้ชำระเงิน]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="16" y="50" width="235" height="30" forecolor="#0F172A" uuid="8954d5d5-208a-4db9-913e-82bd686a1457"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{prefix} + $F{first_name} + " " + $F{last_name}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="16" y="84" width="235" height="50" forecolor="#1E293B" uuid="c8f2d75b-003d-4e54-937b-617548d4a445"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["เลขที่ " + $F{location_house_number} + " หมู่ " + $F{location_village_no} + " " +  ($F{location_village_name}.startsWith("หมู่") ? $F{location_village_name} : "หมู่" + $F{location_village_name}) + " ต." + $F{registered_subdistrict} + " อ." + $F{registered_district} + " จ." + $F{registered_province}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="16" y="146" width="235" height="26" forecolor="#1E293B" uuid="b13638f4-82c8-47a9-acbd-cafb90450c2c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รหัสสมาชิก: SV-" + $F{service_id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="280" y="40" width="235" height="24" forecolor="#334155" uuid="f0ddce89-07c8-4d97-b5cb-2330b4fe90c3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ช่องทางการชำระเงิน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="68" width="235" height="34" forecolor="#0F172A" uuid="074a579e-a093-4d45-ae92-6d4f09ef073a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[โอนเงินผ่านบัญชีธนาคาร]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="104" width="235" height="26" forecolor="#334155" uuid="074a579e-a093-4d45-ae92-6d4f09ef073b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18"/>
+				</textElement>
+				<text><![CDATA[การชำระผ่านระบบออนไลน์]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="190" splitType="Stretch">
+			<rectangle radius="16">
+				<reportElement x="0" y="10" width="515" height="170" backcolor="#FFFFFF" uuid="9ecab35a-dfd3-4608-bd67-34f68b48485c"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#CBD5E1"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle radius="16">
+				<reportElement x="0" y="10" width="515" height="42" backcolor="#F1F5F9" uuid="c4e62280-3afe-403a-901c-d8e1f749252e"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="24" y="10" width="200" height="42" forecolor="#1E293B" uuid="e3c26d13-b5cd-489c-a0b0-0b995aa59eb5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[รายการชำระ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="10" width="141" height="42" forecolor="#1E293B" uuid="f6d7f7d0-cd95-448c-9a0f-ae489d5baaee"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[จำนวนเงิน (บาท)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="24" y="52" width="280" height="36" forecolor="#0F172A" uuid="16bc9eb4-87ec-467b-95fe-d502c38e1c40"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ค่าธรรมเนียมเก็บขนขยะมูลฝอย]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="24" y="88" width="280" height="24" forecolor="#334155" uuid="782e21c1-261b-49a7-9d63-9fa4e22592ef"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ประเภท: " + $F{service_type}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="350" y="62" width="141" height="32" forecolor="#0F172A" uuid="0ef729dd-778e-4240-89bd-e24ac150a6c0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="24" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{amount_paid}]]></textFieldExpression>
+			</textField>
+			<rectangle radius="12">
+				<reportElement x="1" y="118" width="513" height="61" backcolor="#F8FAFC" uuid="d4c3b2a1-0987-4f5e-a6b7-c8d9e0f1a2b3"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="170" y="118" width="170" height="61" forecolor="#0F172A" uuid="3e521bf0-02b0-4297-aa87-b65e459f2543"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ยอดชำระสุทธิ]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="345" y="118" width="150" height="61" forecolor="#15803D" uuid="04384e28-cbb9-437d-8f8e-31f0d75896e2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="30" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["฿ " + new java.text.DecimalFormat("#,##0.00").format($F{amount_paid})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="120" width="515" height="1" forecolor="#23B031" uuid="e94214e0-89f3-49f4-a170-ddd68ba8baec"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="65" splitType="Stretch">
+			<rectangle radius="12">
+				<reportElement x="0" y="5" width="515" height="52" backcolor="#F8FAFC" uuid="d2372ea9-a8d2-4a41-9a39-c73293143567"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#CBD5E1"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="24" y="5" width="150" height="52" forecolor="#334155" uuid="94bf1d4d-b701-4667-94d7-61cf82e0143a"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[จำนวนเงินตัวอักษร]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="180" y="5" width="311" height="52" forecolor="#0F172A" uuid="f3cfca5d-9d21-4414-9989-b20ea739ac89"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new com.ibm.icu.text.RuleBasedNumberFormat(new java.util.Locale("th", "TH"), com.ibm.icu.text.RuleBasedNumberFormat.SPELLOUT).format($F{amount_paid}) + "บาทถ้วน"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="80" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="16" width="400" height="26" forecolor="#0F172A" uuid="9d091025-1c55-4c29-a440-bd665323cfbd"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เอกสารนี้ได้รับการรับรองทางอิเล็กทรอนิกส์]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="42" width="400" height="24" forecolor="#334155" uuid="a2077a83-4582-46ee-9816-dde219231f3e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18"/>
+				</textElement>
+				<text><![CDATA[ออกโดยระบบอัตโนมัติ ไม่จำเป็นต้องประทับตราหรือลงชื่อ]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>

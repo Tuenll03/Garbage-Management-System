@@ -8,7 +8,7 @@ function HomeMember({ onNavigate }) {
     const [hasNewApproval, setHasNewApproval] = useState(false);
     const [newAnnouncement, setNewAnnouncement] = useState(false);
     const [newInvoice, setNewInvoice] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
+
 
     useEffect(() => {
         const fetchMember = async () => {
@@ -20,9 +20,8 @@ function HomeMember({ onNavigate }) {
             }
 
             try {
-                const response = await axios.get('http://localhost:8081/api/members');
-                const members = response.data;
-                const foundMember = members.find(m => m.citizenId === storedCitizenId);
+                const response = await axios.get(`http://localhost:8081/api/members/citizenId/${storedCitizenId}`);
+                const foundMember = response.data;
                 if (foundMember) {
                     setMember(foundMember);
 
@@ -88,9 +87,10 @@ function HomeMember({ onNavigate }) {
     }, [onNavigate]);
 
     const handleLogout = () => {
-        // Navigate back to login page
         onNavigate('login');
     };
+
+
 
     if (loading) {
         return (
@@ -125,27 +125,19 @@ function HomeMember({ onNavigate }) {
                 </div>
 
                 <div className="navbar-actions">
-                    <div className="user-badge" onClick={() => setShowDropdown(!showDropdown)}>
+                    <div className="user-badge" style={{ cursor: 'default' }}>
                         <div className="user-avatar-dot"></div>
                         <span>{memberName}</span>
-                        {/* ลูกศรชี้ลงแสดงว่าเป็น Dropdown */}
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: '4px', transform: showDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
                     </div>
 
-                    {showDropdown && (
-                        <div className="user-dropdown-menu">
-                            <button className="logout-btn" onClick={handleLogout}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                    <polyline points="16 17 21 12 16 7" />
-                                    <line x1="21" y1="12" x2="9" y2="12" />
-                                </svg>
-                                ออกจากระบบ
-                            </button>
-                        </div>
-                    )}
+                    <button className="logout-btn" onClick={handleLogout}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        ออกจากระบบ
+                    </button>
                 </div>
             </nav>
 

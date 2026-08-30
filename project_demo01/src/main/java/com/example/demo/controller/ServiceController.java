@@ -24,6 +24,11 @@ public class ServiceController {
         return serviceService.getServiceByMemberId(id);
     }
 
+    @GetMapping("/{id}")
+    public Service getServiceById(@PathVariable @NonNull Integer id) {
+        return serviceService.getServiceById(id);
+    }
+
     @PostMapping
     public String createService(@RequestBody @NonNull Service service) {
         String result = serviceService.createService(service);
@@ -39,6 +44,12 @@ public class ServiceController {
     @PutMapping("/{id}/approve")
     public String approveService(@RequestBody @NonNull Service service, @PathVariable @NonNull Integer id) {
         String result = serviceService.approveService(service, id);
+        return result;
+    }
+
+    @PutMapping("/{id}/reject")
+    public String rejectService(@RequestBody @NonNull Service service, @PathVariable @NonNull Integer id) {
+        String result = serviceService.rejectService(service, id);
         return result;
     }
 

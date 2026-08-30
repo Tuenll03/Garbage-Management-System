@@ -1,0 +1,210 @@
+/* ApproveDetail.css */
+
+.approve-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  text-align: left;
+}
+
+/* Header Action */
+.detail-header-nav {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 24px;
+}
+
+.back-list-btn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.back-list-btn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Card Detail Layout */
+.detail-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Section Header styling */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.section-icon {
+  color: #16a34a; /* Theme Green */
+}
+
+/* Grid layout for fields */
+.detail-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  padding-left: 30px;
+}
+
+.detail-field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.field-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Address Box Cards */
+.address-card-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #334155;
+  margin-left: 30px;
+  line-height: 1.6;
+}
+
+/* Service Details inner block card */
+.service-location-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-left: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.location-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.location-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.location-divider {
+  border-top: 1px solid #e2e8f0;
+  margin: 4px 0;
+}
+
+.location-detail {
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Buttons Area styling */
+.action-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-officer-approve {
+  background-color: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.15);
+}
+
+.btn-officer-approve:hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+}
+
+.btn-officer-reject {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+}
+
+.btn-officer-reject:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Status Msg box */
+.status-info-box {
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.status-message-alert {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  margin-top: 12px;
+}

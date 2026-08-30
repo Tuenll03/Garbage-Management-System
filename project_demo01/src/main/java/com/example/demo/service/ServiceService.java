@@ -10,7 +10,6 @@ import com.example.demo.entity.DocumentOfficer;
 import com.example.demo.entity.Member;
 import com.example.demo.repository.OfficerRepository;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.annotation.Scheduled;
 
 @org.springframework.stereotype.Service
 public class ServiceService {
@@ -30,6 +29,10 @@ public class ServiceService {
 
     public List<Service> getServiceByMemberId(@NonNull Integer id) {
         return serviceRepository.findByMemberMemberId(id);
+    }
+
+    public Service getServiceById(@NonNull Integer id) {
+        return serviceRepository.findById(id).orElse(null);
     }
 
     // add member service success
@@ -97,8 +100,29 @@ public class ServiceService {
         }
     }
 
-    @Scheduled(cron = "0 0 8 * * *")
-    public void sendServiceNotification() {
-
+    // officer reject service
+    public String rejectService(@NonNull Service service, @NonNull Integer id) {
+        try {
+            Service existingService = serviceRepository.findById(id).orElse(null);
+            if (existingService == null) {
+                return "Service not found";
+            }
+            if (service.getOfficer() == null) {
+                return "Officer is required";
+            }
+            Integer officerId = service.getOfficer().getOfficerId();
+            DocumentOfficer officer = officerRepository.findById(officerId).orElse(null);
+            if (officer == null) {
+                return "Officer not found";
+            }
+            existingService.setOfficer(officer);
+            existingService.setStatus("ไม่ผ่านการอนุมัติ"); // 🔴 เซ็ตสถานะเป็นไม่ผ่าน
+            serviceRepository.save(existingService);
+            return "success";
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return "error";
+        }
     }
+
 }

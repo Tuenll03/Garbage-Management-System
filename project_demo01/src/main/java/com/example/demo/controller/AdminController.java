@@ -33,6 +33,11 @@ public class AdminController {
         return adminService.getAdminById(id);
     }
 
+    @GetMapping("/citizenId/{citizenId}")
+    public Admin getAdminByCitizenId(@PathVariable @NonNull String citizenId) {
+        return adminService.getAdminByCitizenId(citizenId);
+    }
+
     @PostMapping
     public String createAdmin(@RequestBody @NonNull Admin admin) {
         String result = adminService.createAdmin(admin);
