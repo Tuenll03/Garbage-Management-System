@@ -31,8 +31,13 @@ public class PaymentController {
     }
 
     @PostMapping
-    public String createPayment(@RequestBody @NonNull Payment payment) {
-        return paymentService.createPayment(payment);
+    public String verifyPayment(@RequestBody @NonNull Payment payment) {
+        return paymentService.verifyPayment(payment);
+    }
+
+    @PostMapping("/officer")
+    public String makeCustomerPayment(@RequestBody @NonNull Payment payment) {
+        return paymentService.makeCustomerPayment(payment);
     }
 
 }

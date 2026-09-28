@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import utils from '../../../utils';
-import '../../../CSS/NotifyMember.css';
+import '../../../CSS/NotifyStatus.css';
 
-function NotifyService({ memberId }) {
+function NotifyStatus({ memberId }) {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [message, setMessage] = useState(null);
     useEffect(() => {
         if (!memberId) return;
-        const fetchServiceData = async () => {
+        const notifyStatus = async () => {
             try {
-                const response = await axios.get(`http://localhost:8081/api/services/member/${memberId}`);
-                const sortedServices = response.data.sort((a, b) => b.serviceId - a.serviceId);
-                setServices(sortedServices);
+                const response = await axios.get(`/api/services/member/${memberId}`);
+                const activeServices = response.data.filter(s => s.status !== 'ยกเลิก')
+                    .sort((a, b) => b.serviceId - a.serviceId);
+                setServices(activeServices);
 
                 // บันทึกจำนวนรายการที่อนุมัติทั้งหมดลงเครื่อง เพื่อล้างค่าจุดแดงบนหน้าแรก
-                const approvedCount = sortedServices.filter(s => s.status === 'อนุมัติ').length;
+                const approvedCount = activeServices.filter(s => s.status === 'อนุมัติ').length;
                 localStorage.setItem('seenApprovedCount', approvedCount.toString());
+
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลบริการ:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             } finally {
                 setLoading(false);
             }
         };
-        fetchServiceData();
+        notifyStatus();
     }, [memberId]);
 
     if (loading) {
         return (
-            <div className="homemember-loading" style={{ minHeight: '100px', background: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <div className="homemember-loading notify-loading-clean">
                 <div className="spinner"></div>
                 <p>กำลังโหลดข้อมูลบริการ...</p>
             </div>
@@ -102,7 +104,7 @@ function NotifyService({ memberId }) {
                                             {item.serviceType === 'ชำระรายเดือน' ? `${item.price} บาท/เดือน` : `${item.price * 12} บาท/ปี`}
                                         </span>
                                     </div>
-                                    <div className="info-grid-item" style={{ gridColumn: 'span 2' }}>
+                                    <div className="info-grid-item col-span-2">
                                         <span className="info-grid-label">ที่อยู่รับบริการ</span>
                                         <span className="info-grid-value">
                                             บ้านเลขที่ {item.houseNumber} หมู่ {item.villageNo} {item.villageName ? `หมู่บ้าน${item.villageName}` : ''}
@@ -112,7 +114,7 @@ function NotifyService({ memberId }) {
                                 </div>
 
                                 <div className="notify-card-footer">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="notify-footer-icon" style={{ width: '16px', height: '16px' }}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="notify-footer-icon icon-16">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                         <line x1="16" y1="2" x2="16" y2="6" />
                                         <line x1="8" y1="2" x2="8" y2="6" />
@@ -129,4 +131,4 @@ function NotifyService({ memberId }) {
     );
 }
 
-export default NotifyService;
+export default NotifyStatus;

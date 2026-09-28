@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import utils from '../../../utils';
 
-function PaymentSection({ memberId, onPaymentSuccess }) {
+function MakePaymentOnline({ memberId, onPaymentSuccess }) {
     const [invoices, setInvoices] = useState([]);
     const [message, setMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
@@ -12,23 +12,28 @@ function PaymentSection({ memberId, onPaymentSuccess }) {
     const [uploadingInvoiceId, setUploadingInvoiceId] = useState(null);
 
     useEffect(() => {
-        const fetchInvoices = async () => {
+
+        const viewInvoice = async () => {
             if (!memberId) return;
             try {
-                const invoiceResponse = await axios.get(`http://localhost:8081/api/invoices/member/${memberId}`);
+                const invoiceResponse = await axios.get(`/api/invoices/member/${memberId}`);
                 const unpaidInvoices = invoiceResponse.data.filter(inv => inv.status === 'ค้างชำระ');
-                const sortedInvoices = unpaidInvoices.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-                setInvoices(sortedInvoices);
+                setInvoices(unpaidInvoices);
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลใบแจ้งหนี้:", error);
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+                setIsSuccess(false);
             } finally {
                 setLoading(false);
             }
         };
-        fetchInvoices();
+        viewInvoice();
     }, [memberId]);
 
-    const handleUpload = (e, currentInvoiceId, expectedAmount) => {
+
+
+    //MakePaymentOnline
+    //UploadImageSlip
+    const verifyPayment = (e, currentInvoiceId) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -42,56 +47,40 @@ function PaymentSection({ memberId, onPaymentSuccess }) {
             const base64Result = reader.result;
             setBase64Image(base64Result);
 
-            const data = {
-                "img": base64Result,
-                "tos": true,
-                "privacy": true,
-                "eula": true
-            }
+
             try {
-                const response = await axios.post('https://slip-c.oiio.download/api/slip', data);
-                const dataPayment = response.data;
-
-                const slipAmount = Number(dataPayment?.data?.amount);
-                if (slipAmount < expectedAmount) {
-                    setMessage(`ยอดเงินในสลิป (${slipAmount} บาท) ไม่ครบตามยอดบิล (${expectedAmount} บาท)`);
-                    setIsSuccess(false);
-                    setUploadingInvoiceId(null);
-                    return;
-                }
-
-                const slipAccount = String(dataPayment?.data?.sender_id).replace(/-/g, '');
-                if (!slipAccount.includes('4978')) {
-                    setMessage("สลิปนี้ไม่ได้โอนเข้าเลขบัญชีธนาคารของเทศบาล");
-                    setIsSuccess(false);
-                    setUploadingInvoiceId(null);
-                    return;
-                }
-
-                const rawDate = dataPayment?.data?.date;
-                const paymentDate = rawDate ? String(rawDate).split('T')[0] : new Date().toISOString().split('T')[0];
-
                 const Payment = {
-                    paymentDate: paymentDate,
-                    amountPaid: slipAmount,
-                    paymentMethod: 'โอนชำระ',
                     slipImage: base64Result,
+
                     invoice: {
                         invoiceId: currentInvoiceId
                     }
                 }
 
-                const responstPayment = await axios.post('http://localhost:8081/api/payments', Payment);
-                setMessage(responstPayment.data);
-                setIsSuccess(true);
+                const responstPayment = await axios.post('/api/payments', Payment);
 
-                setInvoices(prevInvoices => prevInvoices.filter(inv => inv.invoiceId !== currentInvoiceId));
-                if (onPaymentSuccess) {
-                    onPaymentSuccess();
+                if (responstPayment.data === "successfully") {
+                    setMessage('ชำระเงินสำเร็จ');
+                    setIsSuccess(true);
+                    setInvoices(prevInvoices => prevInvoices.filter(inv => inv.invoiceId !== currentInvoiceId));
+                    if (onPaymentSuccess) {
+                        onPaymentSuccess();
+                    }
+                } else {
+                    if (responstPayment.data === "Slip image already exists" ||
+                        responstPayment.data === "Amount is not match" ||
+                        responstPayment.data === "Receiver ID is not match") {
+                        setMessage('สลิปนี้เคยส่งเข้ามาแล้ว  สลิปไม่ถูกต้อง');
+                        setIsSuccess(false);
+
+                    } else {
+                        setMessage('การบันทึกล้มเหลว');
+                        setIsSuccess(false);
+                    }
                 }
+
             } catch (error) {
-                console.error(error);
-                setMessage('เกิดข้อผิดพลาด! สลิปไม่ถูกต้องหรือการเชื่อมต่อล้มเหลว');
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
                 setIsSuccess(false);
             } finally {
                 setUploadingInvoiceId(null);
@@ -174,8 +163,8 @@ function PaymentSection({ memberId, onPaymentSuccess }) {
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        onChange={(e) => handleUpload(e, inv.invoiceId, inv.totalAmount)}
-                                        style={{ display: 'none' }}
+                                        onChange={(e) => verifyPayment(e, inv.invoiceId)}
+                                        className="hidden-file-input"
                                         disabled={uploadingInvoiceId !== null}
                                     />
                                 </label>
@@ -276,4 +265,4 @@ function PaymentSection({ memberId, onPaymentSuccess }) {
     );
 }
 
-export default PaymentSection;
+export default MakePaymentOnline;

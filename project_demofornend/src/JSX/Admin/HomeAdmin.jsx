@@ -6,39 +6,46 @@ function HomeAdmin({ onNavigate }) {
     const [admin, setadmin] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeCount, setActiveCount] = useState(0);
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
-        const fetchAdminAndStats = async () => {
+        const fetchAdmin = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
             if (!storedCitizenId) {
                 onNavigate('login');
                 return;
             }
-
             try {
                 // 1. Fetch current logged in admin
-                const response = await axios.get(`http://localhost:8081/api/admins/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/admins/citizenId/${storedCitizenId}`);
                 if (response.data) {
                     setadmin(response.data);
                 } else {
                     onNavigate('login');
                     return;
                 }
-
-                // 2. Fetch officers list to display active count in mockup card
-                const officersRes = await axios.get('http://localhost:8081/api/officers');
-                const activeOfficers = officersRes.data.filter(
-                    o => o.status === 'ทำงาน');
-                setActiveCount(activeOfficers.length);
-
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAdminAndStats();
+        const fetchOfficer = async () => {
+            try {
+                const officersRes = await axios.get('/api/officers');
+                const activeOfficers = officersRes.data.filter(
+                    o => o.status === 'ทำงาน');
+                setActiveCount(activeOfficers.length);
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+
+        }
+
+
+        fetchAdmin();
+        fetchOfficer();
     }, [onNavigate]);
 
     const adminName = admin?.firstName && admin?.lastName
@@ -58,6 +65,7 @@ function HomeAdmin({ onNavigate }) {
         );
     }
 
+
     return (
         <div className="admin-dashboard-wrapper">
             {/* Navigation Bar */}
@@ -75,7 +83,7 @@ function HomeAdmin({ onNavigate }) {
                 </div>
 
                 <div className="navbar-actions">
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{adminName} ({admin?.position || 'ผู้ดูแลระบบ'})</span>
                     </div>
@@ -104,7 +112,7 @@ function HomeAdmin({ onNavigate }) {
 
                 {/* Clickable button card "จัดการเจ้าหน้าที่" */}
                 <div className="dashboard-grid">
-                    <div className="dashboard-btn-card-mockup" onClick={() => onNavigate('manageofficers')}>
+                    <div className="dashboard-btn-card-mockup" onClick={() => onNavigate('listOfficerAccount')}>
                         <div className="btn-card-icon-circle">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />

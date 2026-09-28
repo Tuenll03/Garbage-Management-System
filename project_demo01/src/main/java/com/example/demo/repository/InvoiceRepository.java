@@ -13,4 +13,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
 
     @Query("SELECT i FROM Invoice i WHERE i.service.member.memberId = :memberId")
     List<Invoice> findByService_Member_MemberId(@Param("memberId") int memberId);
+
+    @Query("SELECT i FROM Invoice i WHERE i.service.serviceId = :serviceId")
+    List<Invoice> findByService_ServiceId(@Param("serviceId") int serviceId);
 }

@@ -29,15 +29,16 @@ public class MemberController {
         return memberService.getMemberByCitizenId(citizenId);
     }
 
+    // method Pass
     @PostMapping
-    public String createMember(@RequestBody @NonNull Member member) {
-        String result = memberService.createMember(member);
+    public String registerMember(@RequestBody @NonNull Member member) {
+        String result = memberService.registerMember(member);
         return result;
     }
 
     @PutMapping("/{id}")
-    public String updateMember(@PathVariable @NonNull Integer id, @RequestBody @NonNull Member member) {
-        String result = memberService.updateMember(id, member);
+    public String updateProfile(@PathVariable @NonNull Integer id, @RequestBody @NonNull Member member) {
+        String result = memberService.updateProfile(id, member);
         return result;
     }
 

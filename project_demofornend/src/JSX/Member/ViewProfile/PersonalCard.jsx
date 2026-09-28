@@ -4,6 +4,7 @@ import utils from '../../../utils';
 function PersonalCard({
     member,
     isEditing,
+    isOfficer,
     onEdit,
     onSave,
     onCancel,
@@ -46,7 +47,7 @@ function PersonalCard({
                         <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         คำนำหน้า
                     </span>
-                    {isEditing ? (
+                    {isEditing && isOfficer ? (
                         <select
                             name="prefix"
                             value={formData.prefix || ''}
@@ -68,7 +69,7 @@ function PersonalCard({
                         <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         ชื่อ
                     </span>
-                    {isEditing ? (
+                    {isEditing && isOfficer ? (
                         <input
                             type="text"
                             name="firstName"
@@ -87,7 +88,7 @@ function PersonalCard({
                         <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         นามสกุล
                     </span>
-                    {isEditing ? (
+                    {isEditing && isOfficer ? (
                         <input
                             type="text"
                             name="lastName"
@@ -116,17 +117,7 @@ function PersonalCard({
                         <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         วันเกิด
                     </span>
-                    {isEditing ? (
-                        <input
-                            type="text"
-                            name="birth"
-                            value={formData.birth || ''}
-                            onChange={onChange}
-                            className="field-input"
-                        />
-                    ) : (
-                        <p className="field-value">{utils.formatThaiDate(utils.convertCEtoBE(member?.birth))}</p>
-                    )}
+                    <p className="field-value">{utils.formatThaiDate(utils.convertCEtoBE(member?.birth))}</p>
                 </div>
 
                 {/* เบอร์โทรศัพท์ */}
@@ -145,6 +136,29 @@ function PersonalCard({
                         />
                     ) : (
                         <p className="field-value">{utils.formatPhone(member?.phone)}</p>
+                    )}
+                </div>
+
+                {/* รหัสผ่าน */}
+                <div className="field-item">
+                    <span className="field-label">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        รหัสผ่าน
+                    </span>
+                    {isEditing ? (
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="........"
+                            value={formData.password || ''}
+                            onChange={onChange}
+                            className="field-input"
+                        />
+                    ) : (
+                        <p className="field-value">{utils.maskPassword(member?.password)}</p>
                     )}
                 </div>
             </div>

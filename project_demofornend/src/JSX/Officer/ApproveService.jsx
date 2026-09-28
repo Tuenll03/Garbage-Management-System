@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import utils from '../../utils';
-import '../../CSS/ApproveDetail.css';
+import '../../CSS/ApproveService.css';
 
-function ApproveDetail({ onNavigate }) {
+function ApproveService({ onNavigate }) {
     const [officer, setOfficer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [service, setService] = useState(null);
@@ -13,9 +13,7 @@ function ApproveDetail({ onNavigate }) {
     useEffect(() => {
         const fetchOfficer = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
-            // จริงตรงนี้สามารถลบได้ไม่จำเปนตรวจซ้ำหลายลบเพราะมีการตรวจใน App
             if (!storedCitizenId) {
-                // If not logged in, force return to login
                 onNavigate('login');
                 return;
             }
@@ -31,7 +29,7 @@ function ApproveDetail({ onNavigate }) {
                     onNavigate('login');
                 }
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลเจ้าหน้าที่:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์")
             } finally {
                 setLoading(false);
             }
@@ -42,19 +40,25 @@ function ApproveDetail({ onNavigate }) {
 
 
     useEffect(() => {
-        const storedServiceId = sessionStorage.getItem('selectedServiceId');
-        console.log(storedServiceId);
+        const serviceId = sessionStorage.getItem('selectedServiceId');
+        if (!serviceId) {
+            onNavigate('listApprove');
+            return;
+        }
+        const getServiceId = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8081/api/services/${serviceId}`);
+                const foundService = response.data;
+                setService(foundService);
 
-        const fetchServiceDetail = async () => {
-            const response = await axios.get(`http://localhost:8081/api/services/${storedServiceId}`);
-            const foundService = response.data;
-            setService(foundService);
-
-            const foundMember = response.data.member
-            setMember(foundMember);
+                const foundMember = response.data.member
+                setMember(foundMember);
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์")
+            }
         }
 
-        fetchServiceDetail();
+        getServiceId();
     }, []);
 
     const officerName = officer ? `${officer.prefix || ''}${officer.firstName} ${officer.lastName}` : "ไม่ระบุชื่อ";
@@ -66,40 +70,44 @@ function ApproveDetail({ onNavigate }) {
 
 
 
-    const aprroveService = async () => {
+    const approveService = async () => {
         try {
             const data = {
-                officer: { officerId: officer.officerId } // ส่งข้อมูลไอดีเจ้าหน้าที่ที่กดอนุมัติไปด้วย
+                officer: { officerId: officer?.officerId } // ส่งข้อมูลไอดีเจ้าหน้าที่ที่กดอนุมัติไปด้วย
             };
-            const response = await axios.put(`http://localhost:8081/api/services/${service.serviceId}/approve`, data);
+            const response = await axios.put(`/api/services/${service.serviceId}/approve`, data);
             if (response.data === "success") {
                 setMessage("อนุมัติบริการสำเร็จ");
 
                 // ดึงข้อมูลใหม่มาอัพเดทสเตทให้หน้าเว็บแสดงผลทันที
-                const updated = await axios.get(`http://localhost:8081/api/services/${service.serviceId}`);
+                const updated = await axios.get(`/api/services/${service.serviceId}`);
                 setService(updated.data);
                 setMember(updated.data.member);
+            } else {
+                setMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
             }
         } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการอนุมัติบริการ:", error);
+            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
         }
     }
 
     const rejectService = async () => {
         try {
             const data = {
-                officer: { officerId: officer.officerId } // ส่งข้อมูลไอดีเจ้าหน้าที่ที่กดอนุมัติไปด้วย
+                officer: { officerId: officer?.officerId } // ส่งข้อมูลไอดีเจ้าหน้าที่ที่กดอนุมัติไปด้วย
             };
-            const response = await axios.put(`http://localhost:8081/api/services/${service.serviceId}/reject`, data);
+            const response = await axios.put(`/api/services/${service.serviceId}/reject`, data);
             if (response.data === "success") {
                 setMessage("ไม่ผ่านการอนุมัติบริการ");
                 // ดึงข้อมูลใหม่มาอัพเดทสเตทให้หน้าเว็บแสดงผลทันที
-                const updated = await axios.get(`http://localhost:8081/api/services/${service.serviceId}`);
+                const updated = await axios.get(`/api/services/${service.serviceId}`);
                 setService(updated.data);
                 setMember(updated.data.member);
+            } else {
+                setMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
             }
         } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการไม่อนุมัติบริการ:", error);
+            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
         }
     }
 
@@ -137,7 +145,7 @@ function ApproveDetail({ onNavigate }) {
                         </svg>
                         หน้าหลัก
                     </button>
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{officerName} ({officer?.position || 'เจ้าหน้าที่'})</span>
                     </div>
@@ -247,7 +255,7 @@ function ApproveDetail({ onNavigate }) {
                     <div className="action-buttons-container">
                         {(service.status === "รอดำเนินการ" || service.status === "รอตรวจสอบ") ? (
                             <>
-                                <button className="btn-officer-approve" onClick={aprroveService}>
+                                <button className="btn-officer-approve" onClick={approveService}>
                                     อนุมัติ
                                 </button>
                                 <button className="btn-officer-reject" onClick={rejectService}>
@@ -256,7 +264,7 @@ function ApproveDetail({ onNavigate }) {
                             </>
                         ) : (
                             <div className="status-info-box">
-                                คำขอนี้ได้รับการดำเนินการแล้ว สถานะปัจจุบัน: <span style={{ color: service.status === 'อนุมัติ' ? '#16a34a' : '#ef4444' }}>{service.status}</span>
+                                คำขอนี้ได้รับการดำเนินการแล้ว สถานะปัจจุบัน: <span className={service.status === 'อนุมัติ' ? 'status-text-success' : 'status-text-danger'}>{service.status}</span>
                             </div>
                         )}
                     </div>
@@ -272,4 +280,4 @@ function ApproveDetail({ onNavigate }) {
     );
 }
 
-export default ApproveDetail
+export default ApproveService

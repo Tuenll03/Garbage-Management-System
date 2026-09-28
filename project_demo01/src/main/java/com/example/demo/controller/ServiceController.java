@@ -29,9 +29,10 @@ public class ServiceController {
         return serviceService.getServiceById(id);
     }
 
+    // method pass
     @PostMapping
-    public String createService(@RequestBody @NonNull Service service) {
-        String result = serviceService.createService(service);
+    public String requestService(@RequestBody @NonNull Service service) {
+        String result = serviceService.requestService(service);
         return result;
     }
 
@@ -50,6 +51,18 @@ public class ServiceController {
     @PutMapping("/{id}/reject")
     public String rejectService(@RequestBody @NonNull Service service, @PathVariable @NonNull Integer id) {
         String result = serviceService.rejectService(service, id);
+        return result;
+    }
+
+    @PutMapping("/{id}/cancel")
+    public String cancelService(@PathVariable @NonNull Integer id) {
+        String result = serviceService.cancelService(id);
+        return result;
+    }
+
+    @PutMapping("/{id}/reapply")
+    public String reapplyService(@PathVariable @NonNull Integer id) {
+        String result = serviceService.reapplyService(id);
         return result;
     }
 

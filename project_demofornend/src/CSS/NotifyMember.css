@@ -320,4 +320,28 @@
   }
 }
 
+.navbar-brand-clickable {
+  cursor: pointer;
+}
+
+.notify-title-icon {
+  margin-right: 6px;
+}
+
+.notify-loading-clean {
+  min-height: 100px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.icon-16 {
+  width: 16px;
+  height: 16px;
+}
+
 

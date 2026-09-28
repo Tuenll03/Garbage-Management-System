@@ -1,3 +1,4 @@
+/* ViewAnnouncement.css */
 .announcement-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -124,15 +125,9 @@
 }
 
 .announcements-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-}
-
-@media (max-width: 768px) {
-    .announcements-grid {
-        grid-template-columns: 1fr;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .general-card {
@@ -146,7 +141,7 @@
     justify-content: space-between;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     text-align: left;
-    min-height: 160px;
+    min-height: auto;
 }
 
 .general-card:hover {
@@ -167,6 +162,7 @@
     color: #475569;
     line-height: 1.6;
     margin-bottom: 16px;
+    white-space: pre-line;
 }
 
 .general-card-footer {
@@ -245,4 +241,12 @@
   background-color: #f1f5f9;
   border-color: #94a3b8;
   color: #0f172a;
+}
+
+.navbar-brand-clickable {
+  cursor: pointer;
+}
+
+.read-more-arrow {
+  font-size: 16px;
 }

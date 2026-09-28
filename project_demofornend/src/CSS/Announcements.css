@@ -1,4 +1,4 @@
-/* ManageAnnouncements.css */
+/* Announcements.css */
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
 
 .manage-announcements-wrapper {
@@ -346,4 +346,95 @@
   background-color: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
+}
+
+.list-header-space-between {
+  justify-content: space-between;
+}
+
+.list-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-brand-clickable {
+  cursor: pointer;
+}
+
+.user-badge-default {
+  cursor: default;
+}
+
+.announcement-banner-mb {
+  margin-bottom: 20px;
+}
+
+.announcement-card-box.mt-0 {
+  margin-top: 0px;
+}
+
+.btn-add-announce {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.btn-icon-mr {
+  margin-right: 4px;
+}
+
+.th-announce-topic { width: 28%; text-align: left; }
+.th-announce-detail { width: 38%; text-align: left; }
+.th-announce-date { width: 18%; text-align: left; }
+.th-announce-action { width: 16%; text-align: left; }
+
+.announcement-detail-text {
+  color: #64748b;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.list-header-mb-24 {
+  margin-bottom: 24px;
+}
+
+.list-title-icon-blue {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.list-title-icon-green {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.announcement-date-picker-box {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.announcement-date-text {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.announcement-date-text.placeholder {
+  color: #94a3b8;
+}
+
+.input-icon-static {
+  position: static;
+}
+
+.announcement-date-hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
 }

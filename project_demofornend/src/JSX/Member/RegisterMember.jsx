@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../../CSS/Register.css';
+import '../../CSS/RegisterMember.css';
 import utils from '../../utils';
 import validate from '../../validate';
 import PersonalInfoForm from './Register/PersonalInfoForm';
 import AddressForm from './Register/AddressForm';
 
-function Register({ onNavigate }) {
+function RegisterMember({ onNavigate }) {
   const [citizenId, setCitizenId] = useState('');
   const [prefix, setPrefix] = useState('นาย');
   const [firstName, setFirstName] = useState('');
@@ -20,7 +20,7 @@ function Register({ onNavigate }) {
   const [registeredProvince, setRegisteredProvince] = useState('ลำพูน');
   const [registeredPostalCode, setRegisteredPostalCode] = useState('51160');
   const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,7 +43,7 @@ function Register({ onNavigate }) {
     const clean = utils.cleanLastName(e.target.value);
     setLastName(clean);
   };
-  
+
   const handleBirthChange = (e) => {
     const formatted = utils.formatBirth(e.target.value);
     setBirth(formatted);
@@ -64,21 +64,20 @@ function Register({ onNavigate }) {
     setRegisteredVillageNo(formatted);
   };
 
-  const handleSubmit = async (e) => {
+  const registerMember = async (e) => {
     e.preventDefault();
 
     const cleanedBirth = utils.cleanBirth(birth);
 
-    const errorMsg = validate.vlaidateRegister(
+    const errorMsg = validate.validateRegisterMember(
       citizenId,
-      prefix,
       firstName,
       lastName,
       birth,
+      phone,
       password,
       registeredHouseNumber,
       registeredVillageNo,
-      phone,
       cleanedBirth
     );
 
@@ -105,19 +104,19 @@ function Register({ onNavigate }) {
     };
 
     try {
-      const response = await axios.post('http://localhost:8081/api/members', data);
+      const response = await axios.post('/api/members', data);
       if (response.data === 'success') {
-        setMessage('ลงทะเบียนสมาชิกสำเร็จ! กำลังนำคุณกลับไปหน้าเข้าสู่ระบบ...');
+        setMessage('ลงทะเบียนสมาชิกสำเร็จ! ');
         setIsError(false);
         setTimeout(() => {
           onNavigate('login');
         }, 2000);
       } else {
-        setMessage(response.data);
+        setMessage('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
         setIsError(true);
       }
     } catch (error) {
-      setMessage(' เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
       setIsError(true);
     }
   };
@@ -125,8 +124,8 @@ function Register({ onNavigate }) {
   return (
     <div className="register-wrapper">
       <div className="register-card">
-        <form onSubmit={handleSubmit} className="register-form">
-          
+        <form onSubmit={registerMember} className="register-form">
+
           {/* Section 1: ข้อมูลส่วนตัว */}
           <PersonalInfoForm
             citizenId={citizenId}
@@ -161,15 +160,15 @@ function Register({ onNavigate }) {
             registeredProvince={registeredProvince}
           />
 
+          {/* Message Alert Banner */}
+          {message && (
+            <div className={`message-alert ${isError ? 'error' : 'success'}`}>
+              {message}
+            </div>
+          )}
+
           <button type="submit" className="submit-btn">สมัครเข้าสู่ระบบ</button>
         </form>
-
-        {/* Message Alert Banner */}
-        {message && (
-          <div className={`message-alert ${isError ? 'error' : 'success'}`}>
-            {message}
-          </div>
-        )}
 
         {/* Back to Login Link */}
         <div className="back-to-login-container">
@@ -183,4 +182,4 @@ function Register({ onNavigate }) {
   );
 }
 
-export default Register;
+export default RegisterMember;

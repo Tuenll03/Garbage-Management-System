@@ -1,4 +1,4 @@
-/* ApproveDetail.css */
+/* ApproveService.css */
 
 .approve-detail-container {
   max-width: 800px;
@@ -207,4 +207,16 @@
   font-weight: 700;
   color: #16a34a;
   margin-top: 12px;
+}
+
+.status-text-success {
+  color: #16a34a;
+}
+
+.status-text-danger {
+  color: #ef4444;
+}
+
+.user-badge-default {
+  cursor: default;
 }

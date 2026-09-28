@@ -33,7 +33,7 @@ public class MemberService {
         }
     }
 
-    public String createMember(@NonNull Member member) {
+    public String registerMember(@NonNull Member member) {
         try {
             memberRepository.save(member);
             return "success";
@@ -43,7 +43,7 @@ public class MemberService {
         }
     }
 
-    public String updateMember(@NonNull Integer id, @NonNull Member member) {
+    public String updateProfile(@NonNull Integer id, @NonNull Member member) {
         try {
             Member mngmember = memberRepository.findById(id).orElse(null);
             if (mngmember == null) {

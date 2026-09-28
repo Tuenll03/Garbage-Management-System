@@ -45,6 +45,7 @@ public class InvoiceController {
         try {
             // 1. ขอไฟล์ PDF จาก service
             byte[] pdfBytes = invoiceService.generateInvoicePdf(id);
+
             // 2. ส่งป้ายปะหน้าบอกบราวเซอร์ว่านี่คือไฟล์ PDF (application/pdf)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

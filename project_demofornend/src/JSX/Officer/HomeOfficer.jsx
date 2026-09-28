@@ -7,6 +7,7 @@ import '../../CSS/HomeOfficer.css';
 function HomeOfficer({ onNavigate }) {
     const [officer, setOfficer] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState(null);
 
     // Stats state
     const [pendingRequests, setPendingRequests] = useState(0);
@@ -16,15 +17,13 @@ function HomeOfficer({ onNavigate }) {
     useEffect(() => {
         const fetchOfficer = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
-            // จริงตรงนี้สามารถลบได้ไม่จำเปนตรวจซ้ำหลายลบเพราะมีการตรวจใน App
             if (!storedCitizenId) {
-                // If not logged in, force return to login
                 onNavigate('login');
                 return;
             }
 
             try {
-                const response = await axios.get(`http://localhost:8081/api/officers/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/officers/citizenId/${storedCitizenId}`);
                 const foundOfficer = response.data;
                 //เหลือแค่ตัวนี้พอ
                 if (foundOfficer) {
@@ -33,7 +32,7 @@ function HomeOfficer({ onNavigate }) {
                     onNavigate('login');
                 }
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลเจ้าหน้าที่:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             } finally {
                 setLoading(false);
             }
@@ -42,30 +41,49 @@ function HomeOfficer({ onNavigate }) {
         fetchOfficer();
     }, [onNavigate]);
 
-    // Fetch dashboard counts when officer profile is loaded
+
     useEffect(() => {
-        const fetchCounts = async () => {
+        // Fetch dashboard counts when officer profile is loaded
+        const fetchCountsService = async () => {
             try {
                 // 1. ดึงจำนวนคำขอใหม่ที่ "รอดำเนินการ"
-                const servicesRes = await axios.get('http://localhost:8081/api/services');
+                const servicesRes = await axios.get('/api/services');
                 const pendingSrv = servicesRes.data.filter(s => s.status === 'รอดำเนินการ');
                 setPendingRequests(pendingSrv.length);
 
-                // 2. ดึงจำนวนบิลที่ "ค้างชำระ"
-                const invoicesRes = await axios.get('http://localhost:8081/api/invoices');
-                const pendingInv = invoicesRes.data.filter(inv => inv.status === 'ค้างชำระ');
-                setPendingPayments(pendingInv.length);
-
-                // 3. ดึงจำนวนประกาศข่าวสารทั้งหมด
-                const announcementsRes = await axios.get('http://localhost:8081/api/announcements');
-                setActiveAnnouncements(announcementsRes.data.length);
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลสถิติแดชบอร์ด:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             }
         };
 
+        const fetchInvoice = async () => {
 
-        fetchCounts();
+            try {
+                const invoicesRes = await axios.get('/api/invoices');
+                const pendingInv = invoicesRes.data.filter(inv => inv.status === 'ค้างชำระ');
+                setPendingPayments(pendingInv.length);
+
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+
+        }
+
+        const fetchAnnouncement = async () => {
+            try {
+                // 3. ดึงจำนวนประกาศข่าวสารทั้งหมด
+                const announcementsRes = await axios.get('/api/announcements');
+                setActiveAnnouncements(announcementsRes.data.length);
+
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+        }
+
+
+        fetchCountsService();
+        fetchInvoice();
+        fetchAnnouncement();
     }, [officer]);
 
     const handleLogout = () => {
@@ -80,6 +98,7 @@ function HomeOfficer({ onNavigate }) {
             </div>
         );
     }
+
 
     const officerName = officer ? `${officer.prefix || ''}${officer.firstName} ${officer.lastName}` : "ไม่ระบุชื่อ";
 
@@ -100,7 +119,7 @@ function HomeOfficer({ onNavigate }) {
                 </div>
 
                 <div className="navbar-actions">
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{officerName} ({officer?.position || 'เจ้าหน้าที่'})</span>
                     </div>
@@ -158,7 +177,7 @@ function HomeOfficer({ onNavigate }) {
                             <span className="menu-label">จัดการคำขอ</span>
                         </div>
 
-                        <div className="menu-card" onClick={() => onNavigate('verifyPayments')}>
+                        <div className="menu-card" onClick={() => onNavigate('viewPaymentStatus')}>
                             <div className="menu-icon-container payments">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
@@ -170,7 +189,7 @@ function HomeOfficer({ onNavigate }) {
                             <span className="menu-label">ตรวจสอบการชำระเงิน</span>
                         </div>
 
-                        <div className="menu-card" onClick={() => onNavigate('manageAnnouncements')}>
+                        <div className="menu-card" onClick={() => onNavigate('announcements')}>
                             <div className="menu-icon-container announcements">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -180,7 +199,7 @@ function HomeOfficer({ onNavigate }) {
                             <span className="menu-label">จัดการประกาศ</span>
                         </div>
 
-                        <div className="menu-card" onClick={() => onNavigate('manageHouseholds')}>
+                        <div className="menu-card" onClick={() => onNavigate('searchMember')}>
                             <div className="menu-icon-container households">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />

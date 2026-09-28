@@ -105,7 +105,7 @@ function PersonalInfoForm({
             type="text"
             value={birth}
             onChange={onBirthChange}
-            placeholder="mm/dd/yyyy"
+            placeholder="วัน/เดือน/ปี"
             className="form-input"
             maxLength="10"
           />

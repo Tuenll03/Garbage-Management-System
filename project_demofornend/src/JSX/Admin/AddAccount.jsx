@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import utils from '../../utils';
 import validate from '../../validate';
-import '../../CSS/HomeAdmin.css';
+import '../../CSS/AddAccount.css';
 
-function AddOfficer({ onNavigate }) {
+function AddAccount({ onNavigate }) {
     const [admin, setAdmin] = useState(null);
     const [citizenId, setCitizenId] = useState('');
     const [prefix, setPrefix] = useState('นาย');
@@ -12,12 +12,11 @@ function AddOfficer({ onNavigate }) {
     const [lastName, setLastName] = useState('');
     const [position, setPosition] = useState('เจ้าหน้าที่');
     const [password, setPassword] = useState('');
-
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(null);
     const [isError, setIsError] = useState(false);
 
     useEffect(() => {
-        const fetchAdminAndStats = async () => {
+        const fetchAdmin = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
             if (!storedCitizenId) {
                 onNavigate('login');
@@ -25,8 +24,7 @@ function AddOfficer({ onNavigate }) {
             }
 
             try {
-                // Fetch current logged in admin
-                const response = await axios.get(`http://localhost:8081/api/admins/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/admins/citizenId/${storedCitizenId}`);
                 if (response.data) {
                     setAdmin(response.data);
                 } else {
@@ -35,11 +33,11 @@ function AddOfficer({ onNavigate }) {
                 }
 
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             }
         };
 
-        fetchAdminAndStats();
+        fetchAdmin();
     }, [onNavigate]);
 
     const adminName = admin?.firstName && admin?.lastName
@@ -71,7 +69,7 @@ function AddOfficer({ onNavigate }) {
         setPassword(clean);
     };
 
-    const handleSubmit = async (e) => {
+    const addAccount = async (e) => {
         e.preventDefault();
 
         const errorMsg = validate.vlaidateAddOfficer(
@@ -98,12 +96,9 @@ function AddOfficer({ onNavigate }) {
         }
 
         try {
-            const response = await axios.post("http://localhost:8081/api/officers", data);
-            
-            if (response.data === "error") {
-                setMessage("ไม่สามารถบันทึกข้อมูลได้ เลขประจำตัวประชาชนนี้ถูกใช้งานในระบบแล้ว");
-                setIsError(true);
-            } else {
+            const response = await axios.post("/api/officers", data);
+
+            if (response.data === "successfully") {
                 setMessage("บันทึกข้อมูลเรียบร้อยแล้ว");
                 setIsError(false);
                 setCitizenId("");
@@ -111,12 +106,12 @@ function AddOfficer({ onNavigate }) {
                 setFirstName("");
                 setLastName("");
                 setPassword("");
-                // Auto navigate back after short success message delay
-                setTimeout(() => onNavigate('manageofficers'), 1500);
+            } else {
+                setMessage("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+                setIsError(true);
             }
         } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล:", error);
-            setMessage("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             setIsError(true);
         }
     };
@@ -145,7 +140,7 @@ function AddOfficer({ onNavigate }) {
                         </svg>
                         หน้าหลัก
                     </button>
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{adminName} ({admin?.position || 'ผู้ดูแลระบบ'})</span>
                     </div>
@@ -153,7 +148,7 @@ function AddOfficer({ onNavigate }) {
             </nav>
 
             <div className="admin-container">
-                <form className="officer-form-card" onSubmit={handleSubmit}>
+                <form className="officer-form-card" onSubmit={addAccount}>
                     {/* Citizen ID */}
                     <div className="officer-form-group">
                         <label className="officer-form-label" htmlFor="citizenId">เลขประจำตัวประชาชน (Citizen ID)</label>
@@ -167,7 +162,7 @@ function AddOfficer({ onNavigate }) {
                                     <path d="M5 16s1-1 4-1 4 1 4 1" />
                                 </svg>
                             </span>
-                            <input 
+                            <input
                                 type="text"
                                 id="citizenId"
                                 className="officer-text-input has-icon"
@@ -184,7 +179,7 @@ function AddOfficer({ onNavigate }) {
                     <div className="officer-form-row-double">
                         <div className="officer-form-group">
                             <label className="officer-form-label">คำนำหน้า (Prefix)</label>
-                            <select 
+                            <select
                                 className="officer-select-input"
                                 value={prefix}
                                 onChange={(e) => setPrefix(e.target.value)}
@@ -196,7 +191,7 @@ function AddOfficer({ onNavigate }) {
                         </div>
                         <div className="officer-form-group">
                             <label className="officer-form-label">ตำแหน่ง (Position)</label>
-                            <input 
+                            <input
                                 type="text"
                                 className="officer-text-input"
                                 value={position}
@@ -211,7 +206,7 @@ function AddOfficer({ onNavigate }) {
                     <div className="officer-form-row-double">
                         <div className="officer-form-group">
                             <label className="officer-form-label">ชื่อ (First Name)</label>
-                            <input 
+                            <input
                                 type="text"
                                 className="officer-text-input"
                                 value={firstName}
@@ -222,7 +217,7 @@ function AddOfficer({ onNavigate }) {
                         </div>
                         <div className="officer-form-group">
                             <label className="officer-form-label">นามสกุล (Last Name)</label>
-                            <input 
+                            <input
                                 type="text"
                                 className="officer-text-input"
                                 value={lastName}
@@ -242,7 +237,7 @@ function AddOfficer({ onNavigate }) {
                             </svg>
                             ความปลอดภัยของบัญชี
                         </div>
-                        <div className="officer-form-group" style={{ marginBottom: 0 }}>
+                        <div className="officer-form-group mb-0">
                             <label className="officer-form-label">กำหนดรหัสผ่าน (Password)</label>
                             <div className="officer-input-with-icon">
                                 <span className="officer-input-icon">
@@ -252,13 +247,12 @@ function AddOfficer({ onNavigate }) {
                                         <path d="m15.5 7.5 3 3M19 4l2 2" />
                                     </svg>
                                 </span>
-                                <input 
+                                <input
                                     type="password"
                                     className="officer-text-input has-icon"
                                     value={password}
                                     onChange={handlePasswordChange}
                                     placeholder="อย่างน้อย 8 ตัวอักษร"
-                                    maxLength="8"
                                     required
                                 />
                             </div>
@@ -270,17 +264,17 @@ function AddOfficer({ onNavigate }) {
 
                     {/* Alert Messages */}
                     {message && (
-                        <div className={`modal-alert ${isError ? 'error' : 'success'}`} style={{ marginBottom: '20px' }}>
+                        <div className={`modal-alert ${isError ? 'error' : 'success'} mb-20`}>
                             {message}
                         </div>
                     )}
 
                     {/* Action Buttons Row */}
                     <div className="officer-btn-actions-row">
-                        <button 
-                            type="button" 
-                            className="btn-officer-cancel" 
-                            onClick={() => onNavigate('manageofficers')}
+                        <button
+                            type="button"
+                            className="btn-officer-cancel"
+                            onClick={() => onNavigate('listOfficerAccount')}
                         >
                             ยกเลิก
                         </button>
@@ -300,4 +294,4 @@ function AddOfficer({ onNavigate }) {
     );
 }
 
-export default AddOfficer;
+export default AddAccount;

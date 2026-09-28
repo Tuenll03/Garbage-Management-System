@@ -15,7 +15,7 @@ const utils = {
   //Format Password
   cleanPassword: (value) => {
     if (!value) return '';
-    return value.replace(/\D/g, '').substring(0, 50);
+    return value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50);
   },
   //ทำหน้าเรียก citizenid ที่บันทึกเบราว์เซอร์
   getSavedCitizenId: () => localStorage.getItem('rememberedCitizenId'),
@@ -66,6 +66,7 @@ const utils = {
     if (!value) return '';
     // กรองเอาเฉพาะตัวเลข [0-9]  เท่านั้น (ยาวสูงสุด 10 ตัวอักษร)
     return value.replace(/[^0-9]/g, '').substring(0, 10);
+
   },
   // ทำหน้าที่ทำความสะอาด citizenid
   cleanCitizenId: (citizenId) => {
@@ -189,7 +190,40 @@ const utils = {
     if (!value) return '';
     return value.replace(/[^ก-ฮะ-์a-zA-Z0-9\s()\-]/g, '').substring(0, 50);
   },
+  maskPassword: (value) => {
+    if (!value) return '';
+    return '••••••••';
+  },
+  //FilterInvoice
+  filterInvoice: (invoices) => {
+    return invoices.filter(inv => {
+      if (inv.status !== 'ค้างชำระ') return false;
 
+      // คำนวณหาจำนวนวันต่างระหว่าง วันปัจจุบัน กับ วันที่ครบกำหนด (DueDate)
+      const dueDate = new Date(inv.dueDate);
+      const today = new Date();
+      const timeDiff = dueDate - today;
+      inv.daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // แปลงเป็นจำนวนวัน
+      return inv.daysLeft <= 3; // แสดงเฉพาะบิลที่เหลือไม่เกิน 3 วัน (หรือเลยกำหนดชำระ/ติดลบ)
+    });
+  },
+  filterAnnouncement: (announcements, member) => {
+    const WEEKDAYS = ["วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์"];
+
+    return announcements.filter(item => {
+      // 1) กรองเฉพาะรายการที่ตรงกับหมู่บ้านของสมาชิก
+      const isMatch = member?.service?.some(s =>
+        s.villageName && item.announcementDetail?.includes(s.villageName)
+      );
+      if (isMatch) return true;
+
+      // 2) ข่าวสารทั่วไป: กรองประกาศที่ไม่มีชื่อวันในสัปดาห์
+      const generalAnnouncements = !WEEKDAYS.some(day => item.announcementTopic?.includes(day));
+      if (generalAnnouncements) return true;
+
+      return false;
+    });
+  },
 
 
 }

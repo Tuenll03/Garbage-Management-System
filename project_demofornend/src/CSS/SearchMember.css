@@ -1,3 +1,4 @@
+/* SearchMember.css */
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
 /* Main Wrapper */
@@ -45,12 +46,18 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 24px;
     border: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .search-input-wrapper {
     position: relative;
     max-width: 480px;
-    width: 100%;
+    flex: 1;
+    min-width: 250px;
 }
 
 .search-icon-svg {
@@ -77,6 +84,32 @@
 }
 
 .search-input-field:focus {
+    border-color: #10b981;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.filter-select-wrapper {
+    min-width: 180px;
+}
+
+.status-filter-select {
+    width: 100%;
+    height: 42px;
+    padding: 0 16px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    color: #334155;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.status-filter-select:focus {
     border-color: #10b981;
     background-color: #ffffff;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -203,4 +236,91 @@
     color: #94a3b8;
     padding: 40px !important;
     font-size: 15px;
+}
+
+/* Table Footer with Pagination */
+.table-footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.entries-count-text {
+    font-size: 13.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-nav-btn {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.page-nav-btn:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.page-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-num-btn {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    font-family: 'Sarabun', sans-serif;
+}
+
+.page-num-btn.active {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+}
+
+.page-num-btn:hover:not(.active) {
+    background-color: #f1f5f9;
+}
+
+.col-households-fname { width: 22%; }
+.col-households-lname { width: 22%; }
+.col-households-village { width: 20%; }
+.col-households-status { width: 18%; }
+.col-households-action { width: 18%; }
+
+.navbar-brand-clickable {
+    cursor: pointer;
+}
+
+.user-badge-default {
+    cursor: default;
 }

@@ -22,7 +22,7 @@ public class DocumentOfficer {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @Column(name = "password", nullable = false, length = 8)
+    @Column(name = "password", nullable = false, length = 50)
     private String password;
 
     @Column(name = "position", length = 50)

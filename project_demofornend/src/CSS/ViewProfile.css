@@ -169,6 +169,31 @@
   height: 16px;
 }
 
+.btn-request-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #10b981;
+  color: #ffffff;
+  border: 1px solid #059669;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-request-service:hover {
+  background-color: #059669;
+}
+
+.btn-request-service svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Grid layout for fields */
 .fields-grid-3 {
   display: grid;
@@ -405,3 +430,30 @@
   border-color: #94a3b8;
   color: #0f172a;
 }
+
+.viewprofile-loading {
+  padding-top: 50px;
+  text-align: center;
+}
+
+.navbar-brand-clickable {
+  cursor: pointer;
+}
+
+.service-empty-text {
+  color: #94a3b8;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.service-card-column-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.service-sub-title.mt-10 {
+  margin-top: 10px;
+}
+

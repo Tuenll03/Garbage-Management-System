@@ -7,7 +7,9 @@ function ServiceCard({
     onEdit,
     onSave,
     onCancel,
-    onChangeDetail
+    onChangeDetail,
+    onCancelService,
+    onRequestService
 }) {
     if (services.length === 0) {
         return (
@@ -20,7 +22,7 @@ function ServiceCard({
                         <h3 className="card-title">3. รายละเอียดข้อมูลการรับบริการและที่ตั้ง</h3>
                     </div>
                 </div>
-                <div className="text-center" style={{ color: '#94a3b8', padding: '20px 0' }}>
+                <div className="service-empty-text">
                     ไม่พบข้อมูลคำขอรับบริการขยะ
                 </div>
             </div>
@@ -42,25 +44,34 @@ function ServiceCard({
                                 </h3>
                             </div>
                             <div className="card-actions-box">
-                                <button onClick={() => alert("ระบบยังไม่พร้อมใช้งานการยกเลิกบริการ")} className="btn-cancel-service">
-                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                                    ยกเลิกบริการ
-                                </button>
-                                {isEditing ? (
-                                    <>
-                                        <button onClick={onSave} className="btn-save-profile">บันทึก</button>
-                                        <button onClick={onCancel} className="btn-cancel-profile">ยกเลิก</button>
-                                    </>
-                                ) : (
-                                    <button onClick={onEdit} className="btn-edit-profile">
-                                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
-                                        แก้ไขข้อมูล
+                                {service.status === 'ยกเลิก' ? (
+                                    <button onClick={() => onRequestService && onRequestService(service.serviceId)} className="btn-request-service">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
+                                        ขอรับบริการ
                                     </button>
+                                ) : (
+                                    <>
+                                        <button onClick={() => onCancelService(service.serviceId)} className="btn-cancel-service">
+                                            <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                            ยกเลิกบริการ
+                                        </button>
+                                        {isEditing ? (
+                                            <>
+                                                <button onClick={onSave} className="btn-save-profile">บันทึก</button>
+                                                <button onClick={onCancel} className="btn-cancel-profile">ยกเลิก</button>
+                                            </>
+                                        ) : (
+                                            <button onClick={onEdit} className="btn-edit-profile">
+                                                <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
+                                                แก้ไขข้อมูล
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+                        <div className="service-card-column-group">
                             {/* ที่ตั้งบ้านที่รับบริการ */}
                             <div className="service-sub-title">
                                 <div className="accent-line-title">
@@ -105,7 +116,7 @@ function ServiceCard({
                             </div>
 
                             {/* ข้อมูลการรับบริการ */}
-                            <div className="service-sub-title" style={{ marginTop: '10px' }}>
+                            <div className="service-sub-title mt-10">
                                 <div className="accent-line-title">
                                     <div className="accent-line"></div>
                                     ข้อมูลการรับบริการ

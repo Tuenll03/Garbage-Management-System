@@ -16,23 +16,24 @@ public class AnnouncementController {
     private AnnouncementService announcementService;
 
     @GetMapping
-    public List<Announcement> getAllAnnouncement() {
-        return announcementService.getAllAnnouncement();
+    public List<Announcement> listAnnouncement() {
+        return announcementService.listAnnouncement();
     }
 
     @GetMapping("/{id}")
-    public Announcement getAnnouncementById(@PathVariable @NonNull Integer id) {
-        return announcementService.getAnnouncementById(id);
+    public Announcement getAnnouncement(@PathVariable @NonNull Integer id) {
+        return announcementService.getAnnouncement(id);
     }
 
     @PostMapping
-    public String createAnnouncement(@RequestBody @NonNull Announcement announcement) {
-        String result = announcementService.createAnnouncement(announcement);
+    public String addAnnouncement(@RequestBody @NonNull Announcement announcement) {
+        String result = announcementService.addAnnouncement(announcement);
         return result;
     }
 
     @PutMapping("/{id}")
-    public String updateAnnouncement(@PathVariable @NonNull Integer id, @RequestBody @NonNull Announcement announcement) {
+    public String updateAnnouncement(@PathVariable @NonNull Integer id,
+            @RequestBody @NonNull Announcement announcement) {
         String result = announcementService.updateAnnouncement(id, announcement);
         return result;
     }

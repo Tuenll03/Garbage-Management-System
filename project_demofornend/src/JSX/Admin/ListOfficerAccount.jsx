@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../../CSS/HomeAdmin.css';
+import '../../CSS/ListOfficerAccount.css';
 
-function ManageOfficer({ onNavigate }) {
+function ListOfficerAccount({ onNavigate }) {
     const [admin, setadmin] = useState(null);
     const [officers, setofficers] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState('ทั้งหมด');
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
-        const fetchAdminAndStats = async () => {
+        const fetchAdmin = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
             if (!storedCitizenId) {
                 onNavigate('login');
                 return;
             }
-
             try {
                 // 1. Fetch current logged in admin
-                const response = await axios.get(`http://localhost:8081/api/admins/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/admins/citizenId/${storedCitizenId}`);
                 if (response.data) {
                     setadmin(response.data);
                 } else {
@@ -26,18 +26,18 @@ function ManageOfficer({ onNavigate }) {
                 }
 
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             }
         };
 
 
-        const fetchOfficers = async () => {
-            const response = await axios.get('http://localhost:8081/api/officers');
+        const listOfficerAccount = async () => {
+            const response = await axios.get('/api/officers');
             setofficers(response.data);
         }
 
-        fetchAdminAndStats();
-        fetchOfficers();
+        fetchAdmin();
+        listOfficerAccount();
     }, [onNavigate]);
 
     const adminName = admin?.firstName && admin?.lastName
@@ -56,7 +56,7 @@ function ManageOfficer({ onNavigate }) {
 
     const handleEditOfficer = (citizenId) => {
         sessionStorage.setItem('selectedCitizenId', citizenId);
-        onNavigate('editOfficer');
+        onNavigate('editAccount');
     };
 
     return (
@@ -83,7 +83,7 @@ function ManageOfficer({ onNavigate }) {
                         </svg>
                         หน้าหลัก
                     </button>
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{adminName} ({admin?.position || 'ผู้ดูแลระบบ'})</span>
                     </div>
@@ -97,10 +97,9 @@ function ManageOfficer({ onNavigate }) {
                         {/* Dropdown Filter styled to match mockup */}
                         <div className="admin-search-box">
                             <select
-                                className="search-input-field"
+                                className="search-input-field admin-status-filter-select"
                                 value={selectedStatus}
                                 onChange={changeStatus}
-                                style={{ paddingLeft: '14px', appearance: 'auto', background: '#ffffff', cursor: 'pointer' }}
                             >
                                 <option value="ทั้งหมด">แสดงสถานะทั้งหมด</option>
                                 <option value="ทำงาน">เปิดใช้งาน</option>
@@ -109,7 +108,7 @@ function ManageOfficer({ onNavigate }) {
                         </div>
 
                         {/* Add Officer Button */}
-                        <button className="btn-add-officer" onClick={() => onNavigate('addOfficer')}>
+                        <button className="btn-add-officer" onClick={() => onNavigate('addAccount')}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -123,26 +122,22 @@ function ManageOfficer({ onNavigate }) {
                         <table className="admin-data-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '18%' }}>รหัสเจ้าหน้าที่</th>
-                                    <th style={{ width: '18%' }}>ชื่อ</th>
-                                    <th style={{ width: '18%' }}>นามสกุล</th>
-                                    <th style={{ width: '20%' }}>ตำแหน่ง</th>
-                                    <th style={{ width: '16%' }}>สถานะการใช้งาน</th>
-                                    <th style={{ width: '10%', textAlign: 'center' }}>การจัดการ</th>
+                                    <th className="col-officer-fname">ชื่อ</th>
+                                    <th className="col-officer-lname">นามสกุล</th>
+                                    <th className="col-officer-pos">ตำแหน่ง</th>
+                                    <th className="col-officer-status">สถานะการใช้งาน</th>
+                                    <th className="col-officer-action">การจัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredOfficers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontWeight: 500 }}>
+                                        <td colSpan="5" className="officer-table-empty">
                                             ไม่พบข้อมูลเจ้าหน้าที่
                                         </td>
                                     </tr>
                                 ) : filteredOfficers.map((officer) => (
                                     <tr key={officer.citizenId}>
-                                        <td className="admin-citizen-cell" style={{ fontWeight: 700 }}>
-                                            OFF-{String(officer.officerId).padStart(3, '0')}
-                                        </td>
                                         <td className="admin-name-cell">{officer.firstName}</td>
                                         <td>{officer.lastName}</td>
                                         <td>{officer.position || 'เจ้าหน้าที่'}</td>
@@ -151,23 +146,10 @@ function ManageOfficer({ onNavigate }) {
                                                 • {officer.status === 'ทำงาน' ? 'เปิดใช้งาน' : 'ระงับการใช้งาน'}
                                             </span>
                                         </td>
-                                        <td style={{ textAlign: 'center' }}>
+                                        <td className="td-center">
                                             <button
+                                                className="btn-table-action-icon"
                                                 onClick={() => handleEditOfficer(officer.citizenId)}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: '#94a3b8',
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    padding: '6px',
-                                                    borderRadius: '6px',
-                                                    transition: 'color 0.15s ease'
-                                                }}
-                                                onMouseOver={(e) => e.currentTarget.style.color = '#475569'}
-                                                onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
                                                 title="แก้ไขข้อมูล"
                                             >
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -186,4 +168,4 @@ function ManageOfficer({ onNavigate }) {
     );
 }
 
-export default ManageOfficer;
+export default ListOfficerAccount;

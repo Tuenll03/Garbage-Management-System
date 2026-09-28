@@ -1,39 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../../CSS/AnnouncementMember.css';
+import '../../CSS/ViewAnnouncement.css';
+import utils from '../../utils';
 
-function AnnouncementMember({ onNavigate }) {
+function ViewAnnouncement({ onNavigate }) {
     const [member, setMember] = useState(null);
     const [announcements, setAnnouncements] = useState([]);
     const WEEKDAYS = ["วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์"];
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
-        const fetchAnnouncement = async () => {
+        const fetchMember = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
             if (!storedCitizenId) {
                 onNavigate('login');
                 return;
             }
             try {
-                const response = await axios.get(`http://localhost:8081/api/members/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/members/citizenId/${storedCitizenId}`);
                 const foundMember = response.data;
 
                 if (foundMember) {
                     setMember(foundMember);
+                    viewAnnouncement(foundMember);
                 }
-
-                const announcementsResponse = await axios.get('http://localhost:8081/api/announcements');
-                const announcementsData = announcementsResponse.data;
-                setAnnouncements(announcementsData);
-
-                const newAnnouncementCount = announcementsData.filter(item => item.announcementTopic !== null && item.announcementTopic !== undefined)
-                localStorage.setItem('newAnnouncementCount', newAnnouncementCount.length.toString());
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลสมาชิก:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             }
 
         }
-        fetchAnnouncement();
+
+        const viewAnnouncement = async (member) => {
+            try {
+
+                const announcementsResponse = await axios.get('/api/announcements');
+                const announcementsData = announcementsResponse.data;
+
+                //ใช้ utils.filterAnnouncement
+                const myAnnouncements = utils.filterAnnouncement(announcementsData, member);
+                setAnnouncements(myAnnouncements);
+
+                localStorage.setItem('newAnnouncementCount', myAnnouncements.length.toString());
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+        }
+
+        fetchMember();
+
     }, [onNavigate]);
 
     // Filter announcements where the topic does not contain any of the weekdays
@@ -45,7 +59,7 @@ function AnnouncementMember({ onNavigate }) {
         <div>
             {/* Navigation Bar */}
             <nav className="homemember-navbar">
-                <div className="navbar-brand" onClick={() => onNavigate('homemember')} style={{ cursor: 'pointer' }}>
+                <div className="navbar-brand navbar-brand-clickable" onClick={() => onNavigate('homemember')}>
                     <div className="navbar-logo-box">
                         <svg className="navbar-logo-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19.562 12.097l1.531 2.653c.967 1.674.393 3.815-1.28 4.781-.533.307-1.136.469-1.75.469H16v2.5L11 19l5-3.5V18h2.062c.263 0 .522-.07.75-.201.718-.414.963-1.332.55-2.049l-1.532-2.653 1.732-1zM7.304 9.134l.53 6.08-2.164-1.25-1.031 1.786c-.132.228-.201.487-.201.75 0 .828.671 1.5 1.5 1.5H9v2H5.938c-1.933 0-3.5-1.567-3.5-3.5 0-.614.162-1.218.469-1.75l1.03-1.787-2.164-1.249 5.53-2.58zm6.446-6.165c.532.307.974.749 1.281 1.281l1.03 1.785 2.166-1.25-.53 6.081-5.532-2.58 2.165-1.25-1.031-1.786c-.132-.228-.321-.417-.549-.549-.717-.414-1.635-.168-2.049.549L9.169 7.903l-1.732-1L8.97 4.25c.966-1.674 3.107-2.248 4.781-1.281z" />
@@ -137,11 +151,7 @@ function AnnouncementMember({ onNavigate }) {
                                     <h3 className="general-card-title">{item.announcementTopic}</h3>
                                     <p className="general-card-detail">{item.announcementDetail}</p>
                                 </div>
-                                <div className="general-card-footer">
-                                    <span className="read-more-link">
-                                        อ่านเพิ่มเติม <span style={{ fontSize: '16px' }}>→</span>
-                                    </span>
-                                </div>
+
                             </div>
                         ))}
                     </div>
@@ -151,4 +161,4 @@ function AnnouncementMember({ onNavigate }) {
     );
 }
 
-export default AnnouncementMember;
+export default ViewAnnouncement;

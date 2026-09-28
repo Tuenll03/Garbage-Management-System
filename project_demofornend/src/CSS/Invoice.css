@@ -593,3 +593,23 @@
     color: #ffffff;
 }
 
+.navbar-brand-clickable {
+    cursor: pointer;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.col-invoice-code {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.history-table-empty {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+}
+
+

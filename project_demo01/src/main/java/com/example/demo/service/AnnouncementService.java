@@ -13,11 +13,11 @@ public class AnnouncementService {
     @Autowired
     private AnnouncementRepository announcementRepository;
 
-    public List<Announcement> getAllAnnouncement() {
+    public List<Announcement> listAnnouncement() {
         return announcementRepository.findAll();
     }
 
-    public Announcement getAnnouncementById(@NonNull Integer id) {
+    public Announcement getAnnouncement(@NonNull Integer id) {
         try {
             return announcementRepository.findById(id).orElse(null);
         } catch (Exception e) {
@@ -26,7 +26,7 @@ public class AnnouncementService {
         }
     }
 
-    public String createAnnouncement(@NonNull Announcement announcement) {
+    public String addAnnouncement(@NonNull Announcement announcement) {
         try {
             announcementRepository.save(announcement);
             return "success";
@@ -43,17 +43,17 @@ public class AnnouncementService {
                 return "Announcement not found";
             }
             existingAnnouncement.setAnnouncementTopic(
-                announcement.getAnnouncementTopic() != null ? announcement.getAnnouncementTopic() : existingAnnouncement.getAnnouncementTopic()
-            );
+                    announcement.getAnnouncementTopic() != null ? announcement.getAnnouncementTopic()
+                            : existingAnnouncement.getAnnouncementTopic());
             existingAnnouncement.setAnnouncementDetail(
-                announcement.getAnnouncementDetail() != null ? announcement.getAnnouncementDetail() : existingAnnouncement.getAnnouncementDetail()
-            );
+                    announcement.getAnnouncementDetail() != null ? announcement.getAnnouncementDetail()
+                            : existingAnnouncement.getAnnouncementDetail());
             existingAnnouncement.setAnnouncementDate(
-                announcement.getAnnouncementDate() != null ? announcement.getAnnouncementDate() : existingAnnouncement.getAnnouncementDate()
-            );
+                    announcement.getAnnouncementDate() != null ? announcement.getAnnouncementDate()
+                            : existingAnnouncement.getAnnouncementDate());
             existingAnnouncement.setAnnouncementType(
-                announcement.getAnnouncementType() != null ? announcement.getAnnouncementType() : existingAnnouncement.getAnnouncementType()
-            );
+                    announcement.getAnnouncementType() != null ? announcement.getAnnouncementType()
+                            : existingAnnouncement.getAnnouncementType());
 
             announcementRepository.save(existingAnnouncement);
             return "success";

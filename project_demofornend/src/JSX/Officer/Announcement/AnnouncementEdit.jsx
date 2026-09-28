@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import utils from '../../../utils';
 import validate from '../../../validate';
+import '../../../CSS/AnnouncementEdit.css';
 
-function AnnouncementEdit({ editingId, onEditSuccess, onCancel }) {
+function AnnouncementEdit({ onNavigate }) {
+    const [officer, setOfficer] = useState(null);
     const [newTopic, setNewTopic] = useState('');
     const [newDetail, setNewDetail] = useState('');
     const [newType, setNewType] = useState('ทั่วไป');
@@ -12,48 +14,90 @@ function AnnouncementEdit({ editingId, onEditSuccess, onCancel }) {
     const [isError, setIsError] = useState(false);
 
     useEffect(() => {
-        const fetchAnnouncementDetails = async () => {
-            if (!editingId) return;
+        const fetchOfficer = async () => {
+            const storedCitizenId = sessionStorage.getItem('citizenId');
+            if (!storedCitizenId) {
+                onNavigate('login');
+                return;
+            }
             try {
-                const response = await axios.get(`http://localhost:8081/api/announcements/${editingId}`);
+                const response = await axios.get(`/api/officers/citizenId/${storedCitizenId}`);
+                if (response.data) {
+                    setOfficer(response.data);
+                } else {
+                    onNavigate('login');
+                }
+            } catch (error) {
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+                setIsError(true);
+            }
+        };
+        fetchOfficer();
+    }, [onNavigate]);
+
+    useEffect(() => {
+        const getAnnouncement = async () => {
+            const selectedId = sessionStorage.getItem('selectedAnnouncementId');
+            if (!selectedId) {
+                onNavigate('announcements');
+                return;
+            }
+            try {
+                const response = await axios.get(`/api/announcements/${selectedId}`);
                 const found = response.data;
                 if (found) {
                     setNewTopic(found.announcementTopic || '');
                     setNewDetail(found.announcementDetail || '');
                     setNewType(found.announcementType || 'ทั่วไป');
-                    setNewDate(utils.convertCEtoBE(found.announcementDate) || '');
+                    setNewDate(found.announcementDate || '');
                 }
             } catch (error) {
-                setMessage('เกิดข้อผิดพลาดในการโหลดข้อมูลประกาศ');
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
                 setIsError(true);
             }
         };
 
-        fetchAnnouncementDetails();
-    }, [editingId]);
+        getAnnouncement();
+    }, [onNavigate]);
+
+
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage('');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
+
+
+    const officerName = officer ? `${officer.prefix || ''}${officer.firstName} ${officer.lastName}` : "ไม่ระบุชื่อ";
 
     const handleTopicChange = (e) => {
         const clean = utils.cleanTopic(e.target.value);
         setNewTopic(clean);
     };
 
-    const handleDateChange = (e) => {
-        const clean = utils.cleanBirth(e.target.value);
-        setNewDate(clean);
-    };
+
 
     const handleDetailChange = (e) => {
         const clean = utils.cleanDetail(e.target.value);
         setNewDetail(clean);
     };
 
-    const handleSubmit = async (e) => {
+    const updateAnnouncement = async (e) => {
         e.preventDefault();
+
+        const selectedId = sessionStorage.getItem('selectedAnnouncementId');
+        if (!selectedId) {
+            setMessage('ไม่พบรหัสประกาศที่ต้องการแก้ไข');
+            setIsError(true);
+            return;
+        }
 
         const errorMsg = validate.manageAnnouncements(
             newTopic,
             newDetail,
-            newType,
             newDate
         );
 
@@ -63,142 +107,184 @@ function AnnouncementEdit({ editingId, onEditSuccess, onCancel }) {
             return;
         }
 
-        const cleanedDate = utils.cleanBirth(newDate);
         const data = {
             announcementTopic: newTopic,
             announcementDetail: newDetail,
             announcementType: newType,
-            announcementDate: cleanedDate
+            announcementDate: newDate
         };
 
         try {
-            const response = await axios.put(`http://localhost:8081/api/announcements/${editingId}`, data);
+            const response = await axios.put(`/api/announcements/${selectedId}`, data);
             if (response.data === 'success') {
-                onEditSuccess();
+                setMessage('แก้ไขประกาศสำเร็จ');
+                setIsError(false);
             } else {
-                setMessage(response.data);
+                setMessage("การบันทึกล้มเหลว");
                 setIsError(true);
             }
         } catch (error) {
-            setMessage('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+            setMessage('เกิดข้อผิดพลาดในการอัปเดตประกาศ');
             setIsError(true);
         }
     };
 
     return (
-        <div className="announcement-card-box">
-            <div className="list-header-container" style={{ marginBottom: '24px' }}>
-                <div className="list-title-icon-box" style={{ backgroundColor: '#e8f5e9', color: '#1b5e20' }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                        <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                </div>
-                <div className="list-header-text">
-                    <h2>แก้ไขประกาศข่าวสาร</h2>
-                    <p>ระบุหัวข้อ วันที่ ประเภท และรายละเอียดเพื่อเผยแพร่ข่าวสารประชาสัมพันธ์</p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="announcement-form">
-                <div className="form-row-full">
-                    <label className="form-label" htmlFor="newTopic">
-                        หัวข้อข่าวสาร <span className="required-star">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="newTopic"
-                        className="form-input-text"
-                        value={newTopic}
-                        onChange={handleTopicChange}
-                        placeholder="กรอกหัวข้อข่าวสาร..."
-                        maxLength="50"
-                    />
+        <div className="manage-announcements-wrapper">
+            {/* Navigation Bar */}
+            <nav className="homemember-navbar">
+                <div className="navbar-brand navbar-brand-clickable" onClick={() => onNavigate('homeOfficer')}>
+                    <div className="navbar-logo-box">
+                        <svg className="navbar-logo-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.562 12.097l1.531 2.653c.967 1.674.393 3.815-1.28 4.781-.533.307-1.136.469-1.75.469H16v2.5L11 19l5-3.5V18h2.062c.263 0 .522-.07.75-.201.718-.414.963-1.332.55-2.049l-1.532-2.653 1.732-1zM7.304 9.134l.53 6.08-2.164-1.25-1.031 1.786c-.132.228-.201.487-.201.75 0 .828.671 1.5 1.5 1.5H9v2H5.938c-1.933 0-3.5-1.567-3.5-3.5 0-.614.162-1.218.469-1.75l1.03-1.787-2.164-1.249 5.53-2.58zm6.446-6.165c.532.307.974.749 1.281 1.281l1.03 1.785 2.166-1.25-.53 6.081-5.532-2.58 2.165-1.25-1.031-1.786c-.132-.228-.321-.417-.549-.549-.717-.414-1.635-.168-2.049.549L9.169 7.903l-1.732-1L8.97 4.25c.966-1.674 3.107-2.248 4.781-1.281z" />
+                        </svg>
+                    </div>
+                    <div className="navbar-title-container">
+                        <h1 className="navbar-title">ระบบจัดการขยะเทศบาล</h1>
+                        <p className="navbar-subtitle">เทศบาลตำบลทุ่งหัวช้าง</p>
+                    </div>
                 </div>
 
-                <div className="form-grid-row">
-                    <div className="form-row-full">
-                        <label className="form-label" htmlFor="newDate">
-                            วันที่ประกาศ <span className="required-star">*</span>
-                        </label>
-                        <div className="input-with-icon-wrapper">
-                            <input
-                                type="text"
-                                id="newDate"
-                                className="form-input-text"
-                                value={newDate}
-                                onChange={handleDateChange}
-                                placeholder="วัน-เดือน-ปี พ.ศ. (เช่น 22-08-2569)"
-                                maxLength="10"
-                            />
-                            <span className="input-internal-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6" />
-                                    <line x1="8" y1="2" x2="8" y2="6" />
-                                    <line x1="3" y1="10" x2="21" y2="10" />
-                                </svg>
-                            </span>
+                <div className="navbar-actions">
+                    <button className="back-home-button" onClick={() => onNavigate('announcements')}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        ย้อนกลับ
+                    </button>
+                    <div className="user-badge user-badge-default">
+                        <div className="user-avatar-dot"></div>
+                        <span>{officerName} ({officer?.position || 'เจ้าหน้าที่'})</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div className="manage-announcements-container">
+                <div className="announcement-card-box">
+                    <div className="list-header-container list-header-mb-24">
+                        <div className="list-title-icon-box list-title-icon-blue">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                        </div>
+                        <div className="list-header-text">
+                            <h2>แก้ไขประกาศข่าวสาร</h2>
+                            <p>ปรับปรุงข้อมูลประกาศข่าวสารประชาสัมพันธ์ในระบบ</p>
                         </div>
                     </div>
 
-                    <div className="form-row-full">
-                        <label className="form-label" htmlFor="newType">
-                            ประเภทประกาศ
-                        </label>
-                        <select
-                            id="newType"
-                            className="form-select-box"
-                            value={newType}
-                            onChange={(e) => setNewType(e.target.value)}
-                        >
-                            <option value="ทั่วไป">ทั่วไป</option>
-                            <option value="ด่วน">เร่งด่วน</option>
-                        </select>
-                    </div>
-                </div>
+                    <form onSubmit={updateAnnouncement} className="announcement-form">
+                        <div className="form-row-full">
+                            <label className="form-label" htmlFor="newTopic">
+                                หัวข้อข่าวสาร <span className="required-star">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="newTopic"
+                                className="form-input-text"
+                                value={newTopic}
+                                onChange={handleTopicChange}
+                                placeholder="กรอกหัวข้อข่าวสาร..."
+                                maxLength="50"
+                            />
+                        </div>
 
-                <div className="form-row-full">
-                    <label className="form-label" htmlFor="newDetail">
-                        รายละเอียดข่าวสาร <span className="required-star">*</span>
-                    </label>
-                    <textarea
-                        id="newDetail"
-                        className="form-textarea"
-                        value={newDetail}
-                        onChange={handleDetailChange}
-                        placeholder="ระบุรายละเอียดประกาศข่าวสาร..."
-                        maxLength="255"
-                    />
-                </div>
+                        <div className="form-grid-row">
+                            <div className="form-row-full">
+                                <label className="form-label" htmlFor="newDate">
+                                    วันที่ประกาศ <span className="required-star">*</span>
+                                </label>
+                                <div
+                                    className="form-input-text announcement-date-picker-box"
+                                    onClick={() => {
+                                        const el = document.getElementById('editDatePicker');
+                                        if (el && el.showPicker) el.showPicker();
+                                    }}
+                                >
+                                    <span className={`announcement-date-text ${!newDate ? 'placeholder' : ''}`}>
+                                        {newDate
+                                            ? utils.formatShortThaiDate(utils.convertCEtoBE(newDate))
+                                            : "คลิกเพื่อเลือกวันที่ประกาศ..."}
+                                    </span>
+                                    <span className="input-internal-icon input-icon-static">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+                                    </span>
+                                    <input
+                                        type="date"
+                                        id="editDatePicker"
+                                        value={newDate}
+                                        onChange={(e) => setNewDate(e.target.value)}
+                                        //  กำหนดให้เลือกได้แค่วันปัจจุบัน 
+                                        min={new Date().toISOString().split('T')[0]}
+                                        max={new Date().toISOString().split('T')[0]}
+                                        className="announcement-date-hidden-input"
+                                    />
+                                </div>
+                            </div>
 
-                <div className="form-buttons-row">
-                    <button
-                        type="button"
-                        className="btn-cancel"
-                        onClick={onCancel}
-                    >
-                        ยกเลิก
-                    </button>
-                    <button type="submit" className="btn-submit-save">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="btn-icon">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                            <polyline points="17 21 17 13 7 13 7 21" />
-                            <polyline points="7 3 7 8 15 8" />
-                        </svg>
-                        บันทึกการแก้ไข
-                    </button>
-                </div>
-            </form>
+                            <div className="form-row-full">
+                                <label className="form-label" htmlFor="newType">
+                                    ประเภทประกาศ
+                                </label>
+                                <select
+                                    id="newType"
+                                    className="form-select-box"
+                                    value={newType}
+                                    onChange={(e) => setNewType(e.target.value)}
+                                >
+                                    <option value="ทั่วไป">ทั่วไป</option>
+                                    <option value="ด่วน">เร่งด่วน</option>
+                                </select>
+                            </div>
+                        </div>
 
-            {message && (
-                <div className={`announcement-message-banner ${isError ? 'error' : 'success'}`}>
-                    {message}
+                        <div className="form-row-full">
+                            <label className="form-label" htmlFor="newDetail">
+                                รายละเอียดข่าวสาร <span className="required-star">*</span>
+                            </label>
+                            <textarea
+                                id="newDetail"
+                                className="form-textarea"
+                                value={newDetail}
+                                onChange={handleDetailChange}
+                                placeholder="ระบุรายละเอียดประกาศข่าวสาร..."
+                                maxLength="255"
+                            />
+                        </div>
+
+                        <div className="form-buttons-row">
+                            <button
+                                type="button"
+                                className="btn-cancel"
+                                onClick={() => onNavigate('announcements')}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button type="submit" className="btn-submit-save">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="btn-icon">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
+                                </svg>
+                                บันทึกการแก้ไข
+                            </button>
+                        </div>
+                    </form>
+
+                    {message && (
+                        <div className={`announcement-message-banner ${isError ? 'error' : 'success'}`}>
+                            {message}
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

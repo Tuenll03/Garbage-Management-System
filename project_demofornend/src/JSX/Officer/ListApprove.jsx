@@ -10,19 +10,18 @@ function ListApprove({ onNavigate }) {
     const [loading, setLoading] = useState(true);
     const [service, setService] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState("ทั้งหมด");
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
         const fetchOfficer = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
-            // จริงตรงนี้สามารถลบได้ไม่จำเปนตรวจซ้ำหลายลบเพราะมีการตรวจใน App
             if (!storedCitizenId) {
-                // If not logged in, force return to login
                 onNavigate('login');
                 return;
             }
 
             try {
-                const response = await axios.get(`http://localhost:8081/api/officers/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/officers/citizenId/${storedCitizenId}`);
                 const foundOfficer = response.data;
 
                 //เหลือแค่ตัวนี้พอ
@@ -32,7 +31,7 @@ function ListApprove({ onNavigate }) {
                     onNavigate('login');
                 }
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลเจ้าหน้าที่:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์")
             } finally {
                 setLoading(false);
             }
@@ -43,12 +42,17 @@ function ListApprove({ onNavigate }) {
 
 
     useEffect(() => {
-        const fetchService = async () => {
-            const response = await axios.get('http://localhost:8081/api/services')
-            const dataRequest = response.data
-            setService(dataRequest)
+        const listApproveService = async () => {
+            try {
+                const response = await axios.get('/api/services')
+                const dataRequest = response.data.filter((s) => s.status !== "ยกเลิก")
+
+                setService(dataRequest.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate)))
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์")
+            }
         }
-        fetchService()
+        listApproveService()
     }, [])
 
     const changeStatus = (e) => {
@@ -65,7 +69,7 @@ function ListApprove({ onNavigate }) {
         if (status === "รอดำเนินการ" || status === "รอตรวจสอบ") {
             return (
                 <span className="status-badge-officer pending">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '4px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="status-badge-icon">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
                         <line x1="16" y1="13" x2="8" y2="13" />
@@ -77,7 +81,7 @@ function ListApprove({ onNavigate }) {
         } else if (status === "อนุมัติ" || status === "อนุมัติแล้ว") {
             return (
                 <span className="status-badge-officer approved">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '4px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="status-badge-icon">
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
                     อนุมัติแล้ว
@@ -86,7 +90,7 @@ function ListApprove({ onNavigate }) {
         } else {
             return (
                 <span className="status-badge-officer rejected">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '4px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="status-badge-icon">
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
@@ -98,7 +102,7 @@ function ListApprove({ onNavigate }) {
 
     const handleViewDetail = (serviceId) => {
         sessionStorage.setItem('selectedServiceId', serviceId);
-        onNavigate('approveDetail');
+        onNavigate('approveService');
     };
 
     const officerName = officer ? `${officer.prefix || ''}${officer.firstName} ${officer.lastName}` : "ไม่ระบุชื่อ";
@@ -136,7 +140,7 @@ function ListApprove({ onNavigate }) {
                         </svg>
                         หน้าหลัก
                     </button>
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{officerName} ({officer?.position || 'เจ้าหน้าที่'})</span>
                     </div>
@@ -165,34 +169,34 @@ function ListApprove({ onNavigate }) {
                     <table className="officer-table">
                         <thead>
                             <tr>
-                                <th>เลขที่ใบสมัคร</th>
-                                <th>ชื่อ - นามสกุล</th>
+                                <th>ชื่อ</th>
+                                <th>นามสกุล</th>
                                 <th>วันที่สมัคร</th>
                                 <th>สถานะ</th>
-                                <th style={{ textAlign: 'right' }}>การจัดการ</th>
+                                <th className="text-right">การจัดการ</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredServices.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', color: '#94a3b8', padding: '30px' }}>
-                                        ไม่มีรายการคำขอในขณะนี้
+                                    <td colSpan="5" className="officer-table-empty">
+                                        ไม่พบข้อมูลของผู้สมัคร
                                     </td>
                                 </tr>
                             ) : (
                                 filteredServices.map((s) => (
                                     <tr key={s.serviceId}>
-                                        <td>{"APP-" + String(s.serviceId).padStart(7, '0')}</td>
-                                        <td>{s.member?.firstName} {s.member?.lastName}</td>
+                                        <td>{s.member?.firstName || "-"}</td>
+                                        <td>{s.member?.lastName || "-"}</td>
                                         <td>{utils.formatDate(s.requestDate)}</td>
                                         <td>{renderStatusBadge(s.status)}</td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td className="text-right">
                                             <span
                                                 className="action-detail-link"
                                                 onClick={() => handleViewDetail(s.serviceId)}
                                             >
                                                 ดูรายละเอียด
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginLeft: '4px' }}>
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="action-arrow-icon">
                                                     <polyline points="9 18 15 12 9 6" />
                                                 </svg>
                                             </span>

@@ -13,4 +13,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 
     @Query("SELECT p FROM Payment p WHERE p.invoice.service.member.memberId = :memberId")
     List<Payment> findByInvoice_Service_Member_MemberId(@Param("memberId") int memberId);
+
+    boolean existsBySlipImage(String slipImage);
 }

@@ -54,22 +54,20 @@ function Login({ onNavigate }) {
     }
 
     const data = {
-      citizenId: utils.cleanCitizenId(citizenId), // ส่งค่าแบบไม่มีขีดคั่น (เช่น 1103700001010) ไปให้เซิร์ฟเวอร์
+      citizenId: utils.cleanCitizenId(citizenId),
       password: password
     };
 
     try {
-      const response = await axios.post('http://localhost:8081/login', data);
+      const response = await axios.post('/login', data);
 
-      if (response.data === "User not found") {
-        setMessage("เลขบัตรประชาชนผู้ใช้และรหัสผ่านไม่ถูกต้อง");
-        setIsError(true);
-      } else if (response.data === "Password not match") {
+      if (response.data === "User not found" || response.data === "Password not match") {
         setMessage("เลขบัตรประชาชนผู้ใช้และรหัสผ่านไม่ถูกต้อง");
         setIsError(true);
       } else {
         setMessage("เข้าสู่ระบบสำเร็จ");
         setIsError(false);
+
         const role = response.data;
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('citizenId', utils.cleanCitizenId(citizenId));
@@ -207,7 +205,7 @@ function Login({ onNavigate }) {
 
         {/* Register Account */}
         <div className="register-container">
-          <a href="#register" onClick={(e) => { e.preventDefault(); onNavigate('register'); }} className="register-link">สมัครเข้าสู่ระบบใหม่</a>
+          <a href="#register" onClick={(e) => { e.preventDefault(); onNavigate('registerMember'); }} className="register-link">สมัครเข้าสู่ระบบใหม่</a>
         </div>
       </div>
     </div>

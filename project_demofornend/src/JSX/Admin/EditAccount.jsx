@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import utils from '../../utils';
 import validate from '../../validate';
-import '../../CSS/HomeAdmin.css';
+import '../../CSS/EditAccount.css';
 
-function EditOfficer({ onNavigate }) {
+function EditAccount({ onNavigate }) {
     const [admin, setAdmin] = useState(null);
     const [officerId, setOfficerId] = useState(null);
     const [citizenId, setCitizenId] = useState('');
@@ -14,45 +14,26 @@ function EditOfficer({ onNavigate }) {
     const [position, setPosition] = useState('เจ้าหน้าที่');
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState('ทำงาน');
-
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(null);
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAdminAndOfficer = async () => {
+        const fetchAdmin = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
-            const selectedCitizenId = sessionStorage.getItem('selectedCitizenId');
-            if (!storedCitizenId || !selectedCitizenId) {
+
+            if (!storedCitizenId) {
                 onNavigate('login');
                 return;
             }
 
             try {
-                // 1. Fetch current logged in admin
-                const adminResponse = await axios.get(`http://localhost:8081/api/admins/citizenId/${storedCitizenId}`);
+                const adminResponse = await axios.get(`/api/admins/citizenId/${storedCitizenId}`);
                 if (adminResponse.data) {
                     setAdmin(adminResponse.data);
                 } else {
                     onNavigate('login');
                     return;
-                }
-
-                // 2. Fetch selected officer details to edit
-                const officerResponse = await axios.get(`http://localhost:8081/api/officers/citizenId/${selectedCitizenId}`);
-                if (officerResponse.data) {
-                    const off = officerResponse.data;
-                    setOfficerId(off.officerId);
-                    setCitizenId(utils.formatCitizenId(off.citizenId));
-                    setPrefix(off.prefix || 'นาย');
-                    setFirstName(off.firstName || '');
-                    setLastName(off.lastName || '');
-                    setPosition(off.position || 'เจ้าหน้าที่');
-                    setPassword(off.password || '');
-                    setStatus(off.status || 'ทำงาน');
-                } else {
-                    setMessage("ไม่พบข้อมูลเจ้าหน้าที่คนดังกล่าว");
-                    setIsError(true);
                 }
 
             } catch (error) {
@@ -62,7 +43,33 @@ function EditOfficer({ onNavigate }) {
             }
         };
 
-        fetchAdminAndOfficer();
+        const getOfficerAccount = async () => {
+            const selectedCitizenId = sessionStorage.getItem('selectedCitizenId');
+            try {
+                const response = await axios.get(`/api/officers/citizenId/${selectedCitizenId}`);
+                if (response.data) {
+                    const off = response.data;
+                    setOfficerId(off.officerId);
+                    setCitizenId(utils.formatCitizenId(off.citizenId));
+                    setPrefix(off.prefix || 'นาย');
+                    setFirstName(off.firstName || '');
+                    setLastName(off.lastName || '');
+                    setPosition(off.position || 'เจ้าหน้าที่');
+                    setPassword(off.password || '');
+                    setStatus(off.status || 'ทำงาน');
+                } else {
+                    setMessage("ไม่พบข้อมูลเจ้าหน้าที่");
+                    setIsError(true);
+                }
+            } catch (error) {
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+                setIsError(true);
+            }
+        }
+
+
+        fetchAdmin();
+        getOfficerAccount();
     }, [onNavigate]);
 
     const adminName = admin?.firstName && admin?.lastName
@@ -94,7 +101,7 @@ function EditOfficer({ onNavigate }) {
         setPassword(clean);
     };
 
-    const handleSubmit = async (e) => {
+    const updateOfficerAccount = async (e) => {
         e.preventDefault();
 
         const errorMsg = validate.vlaidateAddOfficer(
@@ -122,19 +129,19 @@ function EditOfficer({ onNavigate }) {
         }
 
         try {
-            const response = await axios.put(`http://localhost:8081/api/officers/${officerId}`, data);
+            const response = await axios.put(`/api/officers/${officerId}`, data);
 
-            if (response.data === "error") {
-                setMessage("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
-                setIsError(true);
-            } else {
+
+            if (response.data === "successfully") {
                 setMessage("บันทึกการแก้ไขเรียบร้อยแล้ว");
                 setIsError(false);
-                setTimeout(() => onNavigate('manageofficers'), 1500);
+
+            } else {
+                setMessage("ไม่สามารถแก้ไขข้อมูลเจ้าหน้าที่ กรุณาลองใหม่อีกครั้ง");
+                setIsError(true)
             }
         } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการอัปเดตข้อมูล:", error);
-            setMessage("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             setIsError(true);
         }
     };
@@ -172,7 +179,7 @@ function EditOfficer({ onNavigate }) {
                         </svg>
                         หน้าหลัก
                     </button>
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{adminName} ({admin?.position || 'ผู้ดูแลระบบ'})</span>
                     </div>
@@ -180,7 +187,7 @@ function EditOfficer({ onNavigate }) {
             </nav>
 
             <div className="admin-container">
-                <form className="officer-form-card" onSubmit={handleSubmit}>
+                <form className="officer-form-card" onSubmit={updateOfficerAccount}>
                     {/* Citizen ID */}
                     <div className="officer-form-group">
                         <label className="officer-form-label" htmlFor="citizenId">เลขประจำตัวประชาชน (Citizen ID)</label>
@@ -194,18 +201,7 @@ function EditOfficer({ onNavigate }) {
                                     <path d="M5 16s1-1 4-1 4 1 4 1" />
                                 </svg>
                             </span>
-                            <div 
-                                className="officer-text-input has-icon" 
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    backgroundColor: '#f8fafc', 
-                                    color: '#334155', 
-                                    cursor: 'not-allowed',
-                                    border: '1px solid #e2e8f0',
-                                    boxSizing: 'border-box'
-                                }}
-                            >
+                            <div className="officer-text-input has-icon officer-text-disabled">
                                 {utils.maskCitizenId(citizenId)}
                             </div>
 
@@ -272,8 +268,8 @@ function EditOfficer({ onNavigate }) {
                             ความปลอดภัยและการตั้งค่าบัญชี
                         </div>
 
-                        <div className="officer-form-row-double" style={{ gap: '20px', width: '100%' }}>
-                            <div className="officer-form-group" style={{ marginBottom: 0 }}>
+                        <div className="officer-form-row-double w-full">
+                            <div className="officer-form-group mb-0">
                                 <label className="officer-form-label">รหัสผ่าน (Password)</label>
                                 <div className="officer-input-with-icon">
                                     <span className="officer-input-icon">
@@ -294,7 +290,7 @@ function EditOfficer({ onNavigate }) {
                                 </div>
                             </div>
 
-                            <div className="officer-form-group" style={{ marginBottom: 0 }}>
+                            <div className="officer-form-group mb-0">
                                 <label className="officer-form-label">สถานะการใช้งาน</label>
                                 <select
                                     className="officer-select-input"
@@ -313,7 +309,7 @@ function EditOfficer({ onNavigate }) {
 
                     {/* Alert Messages */}
                     {message && (
-                        <div className={`modal-alert ${isError ? 'error' : 'success'}`} style={{ marginBottom: '20px' }}>
+                        <div className={`modal-alert ${isError ? 'error' : 'success'} mb-20`}>
                             {message}
                         </div>
                     )}
@@ -323,7 +319,7 @@ function EditOfficer({ onNavigate }) {
                         <button
                             type="button"
                             className="btn-officer-cancel"
-                            onClick={() => onNavigate('manageofficers')}
+                            onClick={() => onNavigate('listOfficerAccount')}
                         >
                             ยกเลิก
                         </button>
@@ -342,4 +338,4 @@ function EditOfficer({ onNavigate }) {
     );
 }
 
-export default EditOfficer;
+export default EditAccount;

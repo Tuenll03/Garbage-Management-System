@@ -117,7 +117,7 @@ public class InvoiceService {
         // 1. อ่านไฟล์แบบฟอร์มสำเร็จรูปจาก resources/reports/
         InputStream reportStream = getClass().getResourceAsStream("/reports/demoInvoice.jrxml");
 
-        // Compile .jrxml file before filling it
+        // ตรวจสอบแบบฟอร์มให้ระบบพร้อมใช้งาน
         JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
 
         // 2. นำไอดีบิลใส่เป็นพารามิเตอร์ส่งไปให้ SQL ใน Jasper
@@ -128,9 +128,10 @@ public class InvoiceService {
         // และปิดสายคืนให้อัตโนมัติเมื่อทำเสร็จ
         try (Connection conn = dataSource.getConnection()) {
 
-            // สั่งกรอกข้อมูล และแปลงเป็น PDF
+            // สั่งกรอกข้อมูลลงไปในไฟล์แบบฟอร์ม
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
 
+            // 4. แปลงข้อมูลที่กรอกแล้วให้กลายเป็น "ไฟล์ PDF" จริงๆ
             return JasperExportManager.exportReportToPdf(jasperPrint);
         }
     }

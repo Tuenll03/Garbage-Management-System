@@ -15,8 +15,8 @@ public class OfficerController {
     private OfficerService officerService;
 
     @GetMapping
-    public List<DocumentOfficer> getAllOfficer() {
-        return officerService.getAllOfficer();
+    public List<DocumentOfficer> listOfficerAccount() {
+        return officerService.listOfficerAccount();
     }
 
     @GetMapping("/{id}")
@@ -30,14 +30,15 @@ public class OfficerController {
     }
 
     @PostMapping
-    public String createOfficer(@RequestBody @NonNull DocumentOfficer officer) {
-        String result = officerService.createOfficer(officer);
+    public String addAccount(@RequestBody @NonNull DocumentOfficer officer) {
+        String result = officerService.addAccount(officer);
         return result;
     }
 
     @PutMapping("/{id}")
-    public String updateOfficer(@RequestBody @NonNull DocumentOfficer officer, @PathVariable @NonNull Integer id) {
-        String result = officerService.updateOfficer(officer, id);
+    public String updateOfficerAccount(@RequestBody @NonNull DocumentOfficer officer,
+            @PathVariable @NonNull Integer id) {
+        String result = officerService.updateOfficerAccount(officer, id);
         return result;
     }
 

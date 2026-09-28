@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../CSS/HomeMember.css';
+import utils from '../../utils';
 
 function HomeMember({ onNavigate }) {
     const [member, setMember] = useState(null);
@@ -8,83 +9,133 @@ function HomeMember({ onNavigate }) {
     const [hasNewApproval, setHasNewApproval] = useState(false);
     const [newAnnouncement, setNewAnnouncement] = useState(false);
     const [newInvoice, setNewInvoice] = useState(false);
+    const [message, setMessage] = useState(null);
+    const [unpaidInvoices, setUnpaidInvoices] = useState('ไม่มีค้างชำระ');
 
 
     useEffect(() => {
         const fetchMember = async () => {
             const storedCitizenId = sessionStorage.getItem('citizenId');
             if (!storedCitizenId) {
-                // If not logged in, force return to login
                 onNavigate('login');
                 return;
             }
 
             try {
-                const response = await axios.get(`http://localhost:8081/api/members/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/members/citizenId/${storedCitizenId}`);
                 const foundMember = response.data;
                 if (foundMember) {
                     setMember(foundMember);
-
-
-                    //APPROVE
-                    const serviceResponse = await axios.get(`http://localhost:8081/api/services/member/${foundMember.memberId}`);
-                    const services = serviceResponse.data;
-                    // คัดกรองเอาเฉพาะรายการที่ "อนุมัติ"
-                    const approvedServices = services.filter(s => s.status === 'อนุมัติ');
-                    // ดึงจำนวนคำร้องอนุมัติที่เคยเห็นล่าสุดที่เก็บไว้ในเครื่องผู้ใช้
-                    const lastSeenCount = parseInt(localStorage.getItem('seenApprovedCount') || '0', 10);
-                    // ถ้าในฐานข้อมูลมีรายการอนุมัติมากกว่าที่เครื่องผู้ใช้เคยเห็น แปลว่ามีอนุมัติเข้ามาใหม่!
-                    if (approvedServices.length > lastSeenCount) {
-                        setHasNewApproval(true);
-                    } else {
-                        setHasNewApproval(false);
-                    }
-
-                    //invoice
-                    const invoiceResponse = await axios.get(`http://localhost:8081/api/invoices/member/${foundMember.memberId}`);
-                    const invoices = invoiceResponse.data;
-                    // คัดกรองเอาเฉพาะรายการที่ "ค้างชำระ" และครบกำหนดภายใน 3 วัน (หรือเลยกำหนดชำระ)
-                    const unpaidInvoices = invoices.filter(inv => {
-                        if (inv.status !== 'ค้างชำระ') return false;
-                        const dueDate = new Date(inv.dueDate);
-                        const today = new Date();
-                        const timeDiff = dueDate - today;
-                        const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-                        return daysLeft <= 3;
-                    });
-                    // ดึงจำนวนบิลค้างชำระที่เคยเห็นล่าสุดที่เก็บไว้ในเครื่องผู้ใช้
-                    const lastSeenInvoiceCount = parseInt(localStorage.getItem('seenInvoicesCount') || '0', 10);
-                    // ถ้าในฐานข้อมูลมีบิลค้างชำระมากกว่าที่เครื่องผู้ใช้เคยเห็น แปลว่ามีบิลใหม่เข้ามา!
-                    if (unpaidInvoices.length > lastSeenInvoiceCount) {
-                        setNewInvoice(true);
-                    } else {
-                        setNewInvoice(false);
-                    }
-
-                    //Announcement
-                    const announcementsResponse = await axios.get('http://localhost:8081/api/announcements');
-                    const announcementsData = announcementsResponse.data;
-
-                    const newAnnouncementList = announcementsData.filter(item => item.announcementTopic !== null && item.announcementTopic !== undefined);
-                    const lastSeenAnnouncement = parseInt(localStorage.getItem('newAnnouncementCount') || '0', 10);
-                    if (newAnnouncementList.length > lastSeenAnnouncement) {
-                        setNewAnnouncement(true);
-                    } else {
-                        setNewAnnouncement(false);
-                    }
+                    fetchApproval(foundMember);
+                    fetchNotification(foundMember);
+                    fetchAnnouncement(foundMember);
                 } else {
-                    // If no member matches the citizenId in DB, clear session and redirect
                     onNavigate('login');
                 }
             } catch (error) {
-                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลสมาชิก:", error);
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             } finally {
                 setLoading(false);
             }
         };
 
+
+        const fetchApproval = async (member) => {
+            try {
+                //APPROVE
+                const serviceResponse = await axios.get(`/api/services/member/${member.memberId}`);
+                const services = serviceResponse.data;
+
+                // คัดกรองเอาเฉพาะรายการที่ "อนุมัติ"
+                const approvedServices = services.filter(s => s.status === 'อนุมัติ');
+
+                // ดึงจำนวนคำร้องอนุมัติที่เคยเห็นล่าสุดที่เก็บไว้ในเครื่องผู้ใช้
+                let lastSeenCount = parseInt(localStorage.getItem('seenApprovedCount') || '0', 10);
+
+                // ถ้าจำนวนอนุมัติในระบบลดลง (เช่น มีการยกเลิก) ให้รีเซ็ตค่าในเครื่องตามทันที
+                if (approvedServices.length < lastSeenCount) {
+                    lastSeenCount = approvedServices.length;
+                    localStorage.setItem('seenApprovedCount', lastSeenCount.toString());
+                }
+
+                // ถ้าในฐานข้อมูลมีรายการอนุมัติมากกว่าที่เครื่องผู้ใช้เคยเห็น แปลว่ามีอนุมัติเข้ามาใหม่!
+                if (approvedServices.length > lastSeenCount) {
+                    setHasNewApproval(true);
+                } else {
+                    setHasNewApproval(false);
+                }
+
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+        };
+
+        const fetchNotification = async (member) => {
+            try {
+                //invoice
+                const invoiceResponse = await axios.get(`/api/invoices/member/${member.memberId}`);
+
+                //ใช้ utils.filterInvoice
+                const unpaidInvoices = utils.filterInvoice(invoiceResponse.data);
+
+                // ดึงจำนวนบิลค้างชำระที่เคยเห็นล่าสุดที่เก็บไว้ในเครื่องผู้ใช้
+                let lastSeenInvoiceCount = parseInt(localStorage.getItem('seenInvoicesCount') || '0', 10);
+
+                // ถ้าจำนวนบิลค้างชำระในระบบลดลง ให้รีเซ็ตค่าในเครื่องตามทันที
+                if (unpaidInvoices.length < lastSeenInvoiceCount) {
+                    lastSeenInvoiceCount = unpaidInvoices.length;
+                    localStorage.setItem('seenInvoicesCount', lastSeenInvoiceCount.toString());
+                }
+                // ถ้าในฐานข้อมูลมีบิลค้างชำระมากกว่าที่เครื่องผู้ใช้เคยเห็น แปลว่ามีบิลใหม่เข้ามา!
+                if (unpaidInvoices.length > lastSeenInvoiceCount) {
+                    setNewInvoice(true);
+                } else {
+                    setNewInvoice(false);
+                }
+
+                const hasUnpaid = invoiceResponse.data.filter(invoice => invoice.status === 'ค้างชำระ');
+
+                setUnpaidInvoices(hasUnpaid.length > 0 ? 'ค้างชำระ' : 'ไม่มีค้างชำระ');
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+        };
+
+
+        const fetchAnnouncement = async (member) => {
+            try {
+                //Announcement
+                const announcementsResponse = await axios.get('/api/announcements');
+                const announcementsData = announcementsResponse.data;
+
+                //ใช้ utils.filterAnnouncement
+                const myAnnouncements = utils.filterAnnouncement(announcementsData, member);
+
+                let lastSeenAnnouncement = parseInt(localStorage.getItem('newAnnouncementCount') || '0', 10);
+
+                // ถ้าจำนวนประกาศในระบบลดลง ให้รีเซ็ตค่าในเครื่องตามทันที
+                if (myAnnouncements.length < lastSeenAnnouncement) {
+                    lastSeenAnnouncement = myAnnouncements.length;
+                    localStorage.setItem('newAnnouncementCount', lastSeenAnnouncement.toString());
+                }
+
+                // ถ้าในฐานข้อมูลมีประกาศมากกว่าที่เครื่องผู้ใช้เคยเห็น แปลว่ามีประกาศใหม่เข้ามา!
+                if (myAnnouncements.length > lastSeenAnnouncement) {
+                    setNewAnnouncement(true);
+                } else {
+                    setNewAnnouncement(false);
+                }
+
+            } catch (error) {
+                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            }
+        };
+
+
+
         fetchMember();
     }, [onNavigate]);
+
 
     const handleLogout = () => {
         onNavigate('login');
@@ -125,7 +176,7 @@ function HomeMember({ onNavigate }) {
                 </div>
 
                 <div className="navbar-actions">
-                    <div className="user-badge" style={{ cursor: 'default' }}>
+                    <div className="user-badge user-badge-default">
                         <div className="user-avatar-dot"></div>
                         <span>{memberName}</span>
                     </div>
@@ -143,6 +194,7 @@ function HomeMember({ onNavigate }) {
 
             {/* Main Dashboard Container */}
             <main className="homemember-container">
+
                 {/* Welcome Banner */}
                 <section className="welcome-banner">
                     <h2 className="welcome-title">สวัสดีคุณ {memberName}!</h2>
@@ -154,39 +206,6 @@ function HomeMember({ onNavigate }) {
 
                 {/* Stats Grid */}
                 <section className="stats-grid">
-                    {/* Card 1: Points */}
-                    <div className="stat-card">
-                        <div className="stat-icon-wrapper points">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="8" />
-                                <line x1="12" y1="8" x2="12" y2="16" />
-                                <line x1="8" y1="12" x2="16" y2="12" />
-                            </svg>
-                        </div>
-                        <div className="stat-info">
-                            <span className="stat-label">คะแนนสะสมทั้งหมด</span>
-                            <span className="stat-value">
-                                {points}
-                                <span className="stat-unit">คะแนน</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Card 2: Waste Weight */}
-                    <div className="stat-card">
-                        <div className="stat-icon-wrapper waste">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                            </svg>
-                        </div>
-                        <div className="stat-info">
-                            <span className="stat-label">ขยะรีไซเคิลสะสม</span>
-                            <span className="stat-value">
-                                {wasteWeight}
-                                <span className="stat-unit">กิโลกรัม</span>
-                            </span>
-                        </div>
-                    </div>
 
                     {/* Card 3: Pickup Status */}
                     <div className="stat-card" onClick={() => onNavigate('invoiceMember')}>
@@ -197,9 +216,9 @@ function HomeMember({ onNavigate }) {
                             </svg>
                         </div>
                         <div className="stat-info">
-                            <span className="stat-label">สถานะการเก็บขยะ</span>
-                            <span className="stat-value" style={{ fontSize: '20px', color: '#16a34a' }}>
-                                {pickupStatus}
+                            <span className="stat-label">สถานะการชำระเงิน</span>
+                            <span className={`stat-value stat-pickup-status ${unpaidInvoices === 'ค้างชำระ' ? 'unpaid' : ''}`}>
+                                {unpaidInvoices}
                             </span>
                         </div>
                     </div>
@@ -207,7 +226,7 @@ function HomeMember({ onNavigate }) {
 
                 {/* Quick Actions Section */}
                 <section className="dashboard-section" >
-                    <h3 className="section-title" style={{ marginBottom: '20px' }}>บริการและบริการของฉัน</h3>
+                    <h3 className="section-title section-title-mb-20">บริการและบริการของฉัน</h3>
                     <div className="actions-grid">
                         {/* Card 1 */}
                         <div className="action-card" onClick={() => onNavigate('notifyMember')}>
@@ -217,8 +236,7 @@ function HomeMember({ onNavigate }) {
                                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                 </svg>
                                 {/* จุดสีแดงจะขึ้นตรงมุมขวาบนของไอคอนเมื่อมีงานอนุมัติ */}
-                                {hasNewApproval && <span className="red-dot-badge"></span>}
-                                {newInvoice && <span className="red-dot-badge"></span>}
+                                {(newInvoice || hasNewApproval) && <span className="red-dot-badge"></span>}
                             </div>
                             <h4 className="action-title">แจ้งเตือน</h4>
                             <p className="action-desc">แจ้งความประสงค์ขอรับการจัดเก็บขยะทั่วไป/ขยะขนาดใหญ่</p>
@@ -240,7 +258,7 @@ function HomeMember({ onNavigate }) {
                         </div>
 
                         {/* Card 3 */}
-                        <div className="action-card" onClick={() => onNavigate('announcementMember')}>
+                        <div className="action-card" onClick={() => onNavigate('viewAnnouncement')}>
                             <div className="action-icon-box">
                                 <svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
