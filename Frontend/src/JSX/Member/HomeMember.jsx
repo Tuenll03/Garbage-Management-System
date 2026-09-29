@@ -153,11 +153,6 @@ function HomeMember({ onNavigate }) {
     }
 
     const memberName = member ? `${member.prefix || ''}${member.firstName} ${member.lastName}` : "ไม่ระบุชื่อ";
-    const points = 350;
-    const wasteWeight = 74.2;
-    const pickupStatus = "ไม่มีงานคงค้าง";
-
-
 
     return (
         <div className="homemember-wrapper">
