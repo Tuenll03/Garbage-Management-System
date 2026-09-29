@@ -4,6 +4,7 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="garbage"/>
 	<parameter name="BILL_ID" class="java.lang.Integer"/>
+	<parameter name="LOGO_IMAGE" class="java.io.InputStream" isForPrompting="false"/>
 	<queryString language="SQL">
 		<![CDATA[select  
 inv.invoice_number ,
@@ -50,16 +51,20 @@ Where inv.invoice_id = $P{BILL_ID} And inv.status ='ชำระเงินแ�
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="125" splitType="Stretch">
+		<band height="135" splitType="Stretch">
+			<image onErrorType="Blank">
+				<reportElement x="0" y="0" width="38" height="38" uuid="a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"/>
+				<imageExpression><![CDATA[$P{LOGO_IMAGE} != null ? $P{LOGO_IMAGE} : this.getClass().getResourceAsStream("/reports/logo.jpg")]]></imageExpression>
+			</image>
 			<staticText>
-				<reportElement x="0" y="0" width="300" height="38" forecolor="#0F172A" uuid="463e9564-c650-48c0-a45c-acb016133c23"/>
+				<reportElement x="45" y="0" width="255" height="38" forecolor="#0F172A" uuid="463e9564-c650-48c0-a45c-acb016133c23"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="28" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เทศบาลทุ่งหัวช้าง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="38" width="300" height="26" forecolor="#334155" uuid="a45c6501-1240-4a78-b910-f3fa829eb8bf"/>
+				<reportElement x="0" y="40" width="300" height="26" forecolor="#334155" uuid="a45c6501-1240-4a78-b910-f3fa829eb8bf"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="false"/>
 				</textElement>
@@ -106,14 +111,14 @@ Where inv.invoice_id = $P{BILL_ID} And inv.status ='ชำระเงินแ�
 				<textFieldExpression><![CDATA["วันที่ชำระ: " + ($F{payment_date} != null ? new java.text.SimpleDateFormat("d MMMM yyyy", new java.util.Locale("th", "TH")).format($F{payment_date}) : "-")]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="120" width="515" height="1" forecolor="#CBD5E1" uuid="e00e5aa6-1aec-4a5c-acb0-16133c234567"/>
+				<reportElement x="0" y="125" width="515" height="1" forecolor="#CBD5E1" uuid="e00e5aa6-1aec-4a5c-acb0-16133c234567"/>
 			</line>
 		</band>
 	</title>
 	<pageHeader>
 		<band height="200" splitType="Stretch">
 			<rectangle radius="16">
-				<reportElement x="0" y="10" width="265" height="180" backcolor="#F8FAFC" uuid="c731eea8-8151-4967-bfe5-d4737a0846f7"/>
+				<reportElement x="0" y="10" width="265" height="140" backcolor="#F8FAFC" uuid="c731eea8-8151-4967-bfe5-d4737a0846f7"/>
 				<graphicElement>
 					<pen lineWidth="1.0" lineColor="#CBD5E1"/>
 				</graphicElement>
@@ -139,34 +144,27 @@ Where inv.invoice_id = $P{BILL_ID} And inv.status ='ชำระเงินแ�
 				</textElement>
 				<textFieldExpression><![CDATA["เลขที่ " + $F{location_house_number} + " หมู่ " + $F{location_village_no} + " " +  ($F{location_village_name}.startsWith("หมู่") ? $F{location_village_name} : "หมู่" + $F{location_village_name}) + " ต." + $F{registered_subdistrict} + " อ." + $F{registered_district} + " จ." + $F{registered_province}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="16" y="146" width="235" height="26" forecolor="#1E293B" uuid="b13638f4-82c8-47a9-acbd-cafb90450c2c"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA["รหัสสมาชิก: SV-" + $F{service_id}]]></textFieldExpression>
-			</textField>
 			<staticText>
-				<reportElement x="280" y="40" width="235" height="24" forecolor="#334155" uuid="f0ddce89-07c8-4d97-b5cb-2330b4fe90c3"/>
+				<reportElement x="280" y="30" width="235" height="24" forecolor="#334155" uuid="f0ddce89-07c8-4d97-b5cb-2330b4fe90c3"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ช่องทางการชำระเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="280" y="68" width="235" height="34" forecolor="#0F172A" uuid="074a579e-a093-4d45-ae92-6d4f09ef073a"/>
+				<reportElement x="280" y="58" width="235" height="34" forecolor="#0F172A" uuid="074a579e-a093-4d45-ae92-6d4f09ef073a"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+					<font fontName="TH Sarabun New" size="20" isBold="true"/>
 				</textElement>
 				<text><![CDATA[โอนเงินผ่านบัญชีธนาคาร]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="280" y="104" width="235" height="26" forecolor="#334155" uuid="074a579e-a093-4d45-ae92-6d4f09ef073b"/>
+			<textField>
+				<reportElement x="280" y="96" width="235" height="28" forecolor="#334155" uuid="e8001634-0c5a-467c-8991-aa6917eb7918"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18"/>
 				</textElement>
-				<text><![CDATA[การชำระผ่านระบบออนไลน์]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA["วิธีชำระ: " + ($F{payment_method} != null ? $F{payment_method} : "-")]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<detail>

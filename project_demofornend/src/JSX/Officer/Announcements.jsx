@@ -162,17 +162,10 @@ function Announcements({ onNavigate }) {
                                     </tr>
                                 ) : (
                                     announcements.map((item) => {
-                                        const isUrgent = item.announcementType === 'ด่วน' || item.announcementType === 'เร่งด่วน';
-                                        const isGeneral = item.announcementType === 'ทั่วไป';
-                                        let dotClass = 'dot-blue';
-                                        if (isUrgent) dotClass = 'dot-orange';
-                                        else if (isGeneral) dotClass = 'dot-green';
-
                                         return (
                                             <tr key={item.announcementId}>
                                                 <td>
                                                     <div className="topic-td-cell">
-                                                        <span className={`announce-dot ${dotClass}`}></span>
                                                         <span>{item.announcementTopic}</span>
                                                     </div>
                                                 </td>

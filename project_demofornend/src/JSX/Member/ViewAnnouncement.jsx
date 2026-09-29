@@ -51,9 +51,10 @@ function ViewAnnouncement({ onNavigate }) {
     }, [onNavigate]);
 
     // Filter announcements where the topic does not contain any of the weekdays
-    const generalAnnouncements = announcements.filter(item =>
-        !WEEKDAYS.some(day => item.announcementTopic?.includes(day))
-    );
+    const generalAnnouncements = announcements
+        .filter(item => !WEEKDAYS.some(day => item.announcementTopic?.includes(day)))
+        .sort((a, b) => new Date(b.announcementDate) - new Date(a.announcementDate)
+            || b.announcementId - a.announcementId);
 
     return (
         <div>

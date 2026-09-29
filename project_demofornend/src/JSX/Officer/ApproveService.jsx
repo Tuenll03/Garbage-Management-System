@@ -19,7 +19,7 @@ function ApproveService({ onNavigate }) {
             }
 
             try {
-                const response = await axios.get(`http://localhost:8081/api/officers/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/officers/citizenId/${storedCitizenId}`);
                 const foundOfficer = response.data;
 
                 //เหลือแค่ตัวนี้พอ
@@ -47,7 +47,7 @@ function ApproveService({ onNavigate }) {
         }
         const getServiceId = async () => {
             try {
-                const response = await axios.get(`http://localhost:8081/api/services/${serviceId}`);
+                const response = await axios.get(`/api/services/${serviceId}`);
                 const foundService = response.data;
                 setService(foundService);
 

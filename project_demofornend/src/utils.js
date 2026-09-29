@@ -184,7 +184,7 @@ const utils = {
   },
   cleanDetail: (value) => {
     if (!value) return '';
-    return value.replace(/[^ก-ฮะ-์a-zA-Z0-9\s()\-]/g, '').substring(0, 255);
+    return value.replace(/[^ก-ฮะ-์a-zA-Z0-9\s():;,\.\-]/g, '').substring(0, 255);
   },
   cleanTopic: (value) => {
     if (!value) return '';

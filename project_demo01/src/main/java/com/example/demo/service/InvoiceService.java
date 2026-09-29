@@ -56,37 +56,55 @@ public class InvoiceService {
 
     // ทำงานอัตโนมัติ ทุกๆ 10 วินาที เพื่อสำหรับการทดสอบ (ย้ายกลับเป็น "0 0 0 1 * ?"
     // เมื่อรันโปรดักชันจริง)
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void autoGenerateMonthlyInvoices() {
         try {
             List<Service> services = serviceRepository.findAll();
             LocalDate now = LocalDate.now();
 
-            // ⭐️ ย้ายมาตรงนี้ เพื่อดึงข้อมูลจาก DB แค่ครั้งเดียวพอ
+            // ย้ายมาตรงนี้ เพื่อดึงข้อมูลจาก DB แค่ครั้งเดียวพอ
             List<Invoice> existingInvoices = invoiceRepository.findAll();
 
             for (Service service : services) {
                 // หากบริการได้รับการ "อนุมัติ" แล้ว ให้สร้างใบแจ้งหนี้รายเดือนอัตโนมัติ
                 if ("อนุมัติ".equals(service.getStatus())) {
 
-                    // ป้องกันการสร้างใบแจ้งหนี้ซ้ำ (เช็คว่าเคยมี Invoice
-                    // ของบริการนี้ในระบบแล้วหรือยัง)
+                    // ป้องกันการสร้างใบแจ้งหนี้ซ้ำ เช็คว่าเคยมี Invoice
+                    // ของบริการนี้ในระบบแล้วหรือยัง
                     boolean alreadyExists = false;
+
+                    // ตรวจสอบว่าเป็นรายปีหรือรายเดือน
+                    boolean isYearly = "ชำระรายปี".equals(service.getServiceType());
 
                     for (Invoice inv : existingInvoices) {
 
                         LocalDate invoiceDate = inv.getInvoiceDate();
-                        if (invoiceDate != null) {
+
+                        // เช็คว่าไม่เป็น null และบริการของบ้านหลังนี้ ได้ออกบิลไปยัง
+                        if (invoiceDate != null && inv.getService() != null
+                                && inv.getService().getServiceId() == service.getServiceId()) {
+
                             int month = invoiceDate.getMonthValue();
                             int year = invoiceDate.getYear();
 
-                            // เช็คว่าตรงกับเดือนและปีปัจจุบันของตัวแปร now หรือไม่
-                            if (inv.getService() != null && inv.getService().getServiceId() == service.getServiceId() &&
-                                    month == now.getMonthValue() &&
-                                    year == now.getYear()) {
-                                alreadyExists = true;
-                                break;
+                            if (isYearly) {
+
+                                // เช็คว่าตรงกับปีปัจจุบันของตัวแปร now หรือไม่
+                                if (year == now.getYear()) {
+                                    alreadyExists = true;
+                                    break;
+                                }
+
+                            } else {
+
+                                // เช็คว่าตรงกับเดือนและปีปัจจุบันของตัวแปร now หรือไม่
+                                if (year == now.getYear() && month == now.getMonthValue()) {
+                                    alreadyExists = true;
+                                    break;
+                                }
+
                             }
+
                         }
                     }
 
@@ -94,12 +112,18 @@ public class InvoiceService {
                         Invoice invoice = new Invoice();
                         invoice.setService(service);
                         invoice.setInvoiceDate(now);
-                        invoice.setDueDate(now.with(TemporalAdjusters.lastDayOfMonth()));
 
+                        // เช็คว่าเป็นรายปีหรือรายเดือนและออกตามกำหนด
+                        if (isYearly) {
+                            invoice.setDueDate(now.with(TemporalAdjusters.lastDayOfYear()));
+                            invoice.setTotalAmount(invoice.getService().getPrice() * 12);
+                        } else {
+                            invoice.setDueDate(now.with(TemporalAdjusters.lastDayOfMonth()));
+                            invoice.setTotalAmount(invoice.getService().getPrice());
+                        }
                         String dateStr = now.toString().replace("-", "");
-                        int randomNum = (int) (Math.random() * 9000) + 1000;
-                        invoice.setInvoiceNumber("INV-" + dateStr + "-" + randomNum);
-                        invoice.setTotalAmount(service.getPrice() * service.getGarbageWeight());
+                        invoice.setInvoiceNumber(String.format("INV-%s-%04d", dateStr, service.getServiceId()));
+
                         invoice.setStatus("ค้างชำระ");
 
                         invoiceRepository.save(invoice);
@@ -115,7 +139,7 @@ public class InvoiceService {
     public byte[] generateInvoicePdf(int invoiceId) throws Exception {
 
         // 1. อ่านไฟล์แบบฟอร์มสำเร็จรูปจาก resources/reports/
-        InputStream reportStream = getClass().getResourceAsStream("/reports/demoInvoice.jrxml");
+        InputStream reportStream = getClass().getResourceAsStream("/reports/Invoice.jrxml");
 
         // ตรวจสอบแบบฟอร์มให้ระบบพร้อมใช้งาน
         JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);

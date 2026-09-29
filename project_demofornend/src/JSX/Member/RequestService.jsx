@@ -31,7 +31,7 @@ function RequestService({ onNavigate }) {
                 return;
             }
             try {
-                const response = await axios.get(`http://localhost:8081/api/members/citizenId/${storedCitizenId}`);
+                const response = await axios.get(`/api/members/citizenId/${storedCitizenId}`);
                 const foundMember = response.data;
 
                 if (foundMember) {
