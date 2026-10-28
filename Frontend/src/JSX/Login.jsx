@@ -64,6 +64,9 @@ function Login({ onNavigate }) {
       if (response.data === "User not found" || response.data === "Password not match") {
         setMessage("เลขบัตรประชาชนผู้ใช้และรหัสผ่านไม่ถูกต้อง");
         setIsError(true);
+      } else if (response.data === "Officer not working") {
+        setMessage("บัญชีเจ้าหน้าที่ไม่สามารถใช้งานได้");
+        setIsError(true);
       } else {
         setMessage("เข้าสู่ระบบสำเร็จ");
         setIsError(false);
@@ -180,7 +183,6 @@ function Login({ onNavigate }) {
               </div>
               <span>จดจำเลขบัตรประชาชน</span>
             </label>
-            <a href="#forgot-password" className="forgot-password-link">ลืมรหัสผ่าน?</a>
           </div>
 
           {/* Submit Button */}

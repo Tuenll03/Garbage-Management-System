@@ -234,7 +234,7 @@ function HomeMember({ onNavigate }) {
                                 {(newInvoice || hasNewApproval) && <span className="red-dot-badge"></span>}
                             </div>
                             <h4 className="action-title">แจ้งเตือน</h4>
-                            <p className="action-desc">แจ้งความประสงค์ขอรับการจัดเก็บขยะทั่วไป/ขยะขนาดใหญ่</p>
+                            <p className="action-desc">การแจ้งเตือนการชำระเงินและแจ้งขอรับการบริการ</p>
                         </div>
 
                         {/* Card 2 */}
@@ -248,8 +248,8 @@ function HomeMember({ onNavigate }) {
                                     <path d="M12 8h.01" />
                                 </svg>
                             </div>
-                            <h4 className="action-title">บริการ</h4>
-                            <p className="action-desc">ใช้คะแนนสะสมที่มีเพื่อแลกรับสิ่งของอุปโภคบริโภค</p>
+                            <h4 className="action-title">ขอรับบริการเก็บขยะ</h4>
+                            <p className="action-desc">การขอรรับการเก็บขยะจากเทศบาลทุ่งหัวช้าง</p>
                         </div>
 
                         {/* Card 3 */}
@@ -266,7 +266,7 @@ function HomeMember({ onNavigate }) {
                                 {newAnnouncement && <span className="red-dot-badge"></span>}
                             </div>
                             <h4 className="action-title">ข่าวสาร</h4>
-                            <p className="action-desc">แจ้งปัญหาขยะล้นถัง ถังขยะเสียหาย หรือส่งกลิ่นรบกวน</p>
+                            <p className="action-desc">ข่าวสารประชาสัมพันธ์จากเทศบาลทุ่งหัวช้าง</p>
                         </div>
 
                         {/* Card 4 */}
@@ -278,7 +278,7 @@ function HomeMember({ onNavigate }) {
                                 </svg>
                             </div>
                             <h4 className="action-title">ข้อมูลส่วนตัว</h4>
-                            <p className="action-desc">ดูข้อมูลสมาชิกและสถิติข้อมูลที่อยู่อาศัยที่ลงทะเบียนไว้</p>
+                            <p className="action-desc">ดูข้อมูลส่วนตัวของสมาชิก</p>
                         </div>
                     </div>
                 </section>

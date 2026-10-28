@@ -612,4 +612,144 @@
     color: #64748b;
 }
 
+/* Header layout & dropdown */
+.payment-header-left {
+    display: flex;
+    align-items: center;
+}
+
+.payment-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.invoice-filter-select {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.invoice-filter-select:hover {
+    background-color: #f1f5f9;
+}
+
+.invoice-filter-select:focus {
+    border-color: #107c41;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.1);
+}
+
+/* Pay Now Action Button */
+.pay-now-btn {
+    background-color: #107c41;
+    border: 1px solid #107c41;
+    color: #ffffff;
+    padding: 6px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 124, 65, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pay-now-btn:hover {
+    background-color: #0d6334;
+    border-color: #0d6334;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(16, 124, 65, 0.3);
+}
+
+/* Badges for status & property */
+.status-badge.pending {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+.status-badge.pending .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ea580c;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.building-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background-color: #f1f5f9;
+    color: #475569;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.row-unpaid-highlight {
+    background-color: #fffdfb;
+}
+
+.row-unpaid-highlight:hover td {
+    background-color: #fff8f0;
+}
+
+/* Back Button in Payment view */
+.payment-nav-back {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.back-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #107c41;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.back-link-btn:hover {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    transform: translateX(-2px);
+}
+
+.invoice-property-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14.5px;
+}
+
+.property-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.property-value {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+
 

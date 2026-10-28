@@ -136,10 +136,11 @@ public class InvoiceService {
         }
     }
 
+    // สร้าง pdf
     public byte[] generateInvoicePdf(int invoiceId) throws Exception {
 
         // 1. อ่านไฟล์แบบฟอร์มสำเร็จรูปจาก resources/reports/
-        InputStream reportStream = getClass().getResourceAsStream("/reports/Invoice.jrxml");
+        InputStream reportStream = getClass().getResourceAsStream("/reports/receipt.jrxml");
 
         // ตรวจสอบแบบฟอร์มให้ระบบพร้อมใช้งาน
         JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);

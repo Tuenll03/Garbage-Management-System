@@ -8,9 +8,9 @@ import ListPayment from './Invoice/ListPayment';
 function Invoice({ onNavigate }) {
     const [member, setMember] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [payments, setPayments] = useState([]);
+    const [invoices, setInvoices] = useState([]);
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [message, setMessage] = useState(null);
-
 
     useEffect(() => {
         const fetchMember = async () => {
@@ -25,30 +25,33 @@ function Invoice({ onNavigate }) {
 
                 if (foundMember) {
                     setMember(foundMember);
-                    listPayment(foundMember.memberId);
+                    loadInvoices(foundMember.memberId);
                 }
             } catch (error) {
                 setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
             } finally {
                 setLoading(false);
             }
-        }
+        };
         fetchMember();
     }, [onNavigate]);
 
-
-
-    const listPayment = async (memberId) => {
+    const loadInvoices = async (memberId) => {
         try {
-            const paymentResponse = await axios.get(`/api/payments/member/${memberId}`);
-            const sortedPayments = paymentResponse.data.sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
-            setPayments(sortedPayments);
+            const response = await axios.get(`/api/invoices/member/${memberId}`);
+            setInvoices(response.data);
         } catch (error) {
-            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            setMessage("เกิดข้อผิดพลาดในการโหลดรายการบิล");
         }
     };
 
-
+    // ชำระเงินสำเร็จโหลดบิลใหม่และเซ็ตกลับเป็น null
+    const handlePaymentSuccess = () => {
+        if (member) {
+            loadInvoices(member.memberId);
+        }
+        setSelectedInvoice(null);
+    };
 
     if (loading) {
         return (
@@ -57,7 +60,6 @@ function Invoice({ onNavigate }) {
             </div>
         );
     }
-
 
     return (
         <div className="homemember-wrapper">
@@ -96,16 +98,20 @@ function Invoice({ onNavigate }) {
                         <div className="spinner"></div>
                         <p>กำลังโหลดข้อมูล...</p>
                     </div>
+                ) : selectedInvoice ? (
+                    // แสดงหน้าชำระเงิน 
+                    <MakePaymentOnline
+                        invoice={selectedInvoice}
+                        onBack={() => setSelectedInvoice(null)}
+                        onPaymentSuccess={handlePaymentSuccess}
+                    />
                 ) : (
-                    <>
-                        {/* ส่วนแสดงใบแจ้งหนี้ */}
-                        {member && <MakePaymentOnline memberId={member.memberId}
-                            onPaymentSuccess={() => listPayment(member.memberId)} />}
+                    <ListPayment
+                        invoices={invoices}
+                        services={member?.service || []}
+                        onSelectPay={(inv) => setSelectedInvoice(inv)}
+                    />
 
-                        {/* ประวัติการชำระเงิน */}
-                        <ListPayment payments={payments} />
-
-                    </>
                 )}
             </main>
         </div>

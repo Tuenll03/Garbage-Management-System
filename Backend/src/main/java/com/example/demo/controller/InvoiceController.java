@@ -51,7 +51,7 @@ public class InvoiceController {
             headers.setContentType(MediaType.APPLICATION_PDF);
 
             // "inline" สั่งให้บราวเซอร์เปิดแสดงผลพรีวิวบนเว็บโดยไม่ดาวน์โหลดอัตโนมัติ
-            headers.add("Content-Disposition", "inline; filename=\"invoice-" + id + ".pdf\"");
+            headers.add("Content-Disposition", "inline; filename=\"receipt-" + id + ".pdf\"");
 
             // 3. ส่งข้อมูลทั้งหมดตอบกลับไปหาผู้ใช้
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);

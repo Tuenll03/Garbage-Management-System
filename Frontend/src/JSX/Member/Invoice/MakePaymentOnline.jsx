@@ -1,43 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import utils from '../../../utils';
 
-function MakePaymentOnline({ memberId, onPaymentSuccess }) {
-    const [invoices, setInvoices] = useState([]);
+function MakePaymentOnline({ invoice, onBack, onPaymentSuccess }) {
     const [message, setMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
     const [base64Image, setBase64Image] = useState('');
-    const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
-    const [uploadingInvoiceId, setUploadingInvoiceId] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
-    useEffect(() => {
+    if (!invoice) return null;
 
-        const viewInvoice = async () => {
-            if (!memberId) return;
-            try {
-                const invoiceResponse = await axios.get(`/api/invoices/member/${memberId}`);
-                const unpaidInvoices = invoiceResponse.data.filter(inv => inv.status === 'ค้างชำระ');
-                setInvoices(unpaidInvoices);
-            } catch (error) {
-                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-                setIsSuccess(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-        viewInvoice();
-    }, [memberId]);
-
-
-
-    //MakePaymentOnline
-    //UploadImageSlip
-    const verifyPayment = (e, currentInvoiceId) => {
+    // ตรวจสอบและอัปโหลดสลิป
+    const verifyPayment = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        setUploadingInvoiceId(currentInvoiceId);
+        setUploading(true);
         setMessage('กำลังอ่านไฟล์ภาพและตรวจสอบสลิป...');
         setIsSuccess(true);
 
@@ -47,34 +26,33 @@ function MakePaymentOnline({ memberId, onPaymentSuccess }) {
             const base64Result = reader.result;
             setBase64Image(base64Result);
 
-
             try {
                 const Payment = {
                     slipImage: base64Result,
-
                     invoice: {
-                        invoiceId: currentInvoiceId
+                        invoiceId: invoice.invoiceId
                     }
-                }
+                };
 
                 const responstPayment = await axios.post('/api/payments', Payment);
 
                 if (responstPayment.data === "successfully") {
-                    setMessage('ชำระเงินสำเร็จ');
+                    setMessage('ชำระเงินสำเร็จ! กำลังอัปเดตสถานะ...');
                     setIsSuccess(true);
-                    setInvoices(prevInvoices => prevInvoices.filter(inv => inv.invoiceId !== currentInvoiceId));
-                    if (onPaymentSuccess) {
-                        onPaymentSuccess();
-                    }
+                    // รอ 1.5 วินาทีเพื่อให้ลูกบ้านเห็นข้อความสำเร็จ ก่อนพากลับไปหน้ารายการ
+                    setTimeout(() => {
+                        if (onPaymentSuccess) {
+                            onPaymentSuccess();
+                        }
+                    }, 1500);
                 } else {
                     if (responstPayment.data === "Slip image already exists" ||
                         responstPayment.data === "Amount is not match" ||
                         responstPayment.data === "Receiver ID is not match") {
-                        setMessage('สลิปนี้เคยส่งเข้ามาแล้ว  สลิปไม่ถูกต้อง');
+                        setMessage('สลิปนี้เคยส่งเข้ามาแล้ว หรือยอดเงินไม่ถูกต้อง');
                         setIsSuccess(false);
-
                     } else {
-                        setMessage('การบันทึกล้มเหลว');
+                        setMessage('การบันทึกล้มเหลว กรุณาตรวจสอบสลิปอีกครั้ง');
                         setIsSuccess(false);
                     }
                 }
@@ -83,7 +61,7 @@ function MakePaymentOnline({ memberId, onPaymentSuccess }) {
                 setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
                 setIsSuccess(false);
             } finally {
-                setUploadingInvoiceId(null);
+                setUploading(false);
             }
         };
     };
@@ -94,86 +72,100 @@ function MakePaymentOnline({ memberId, onPaymentSuccess }) {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    if (loading) {
-        return (
-            <div className="invoice-loading">
-                <div className="spinner"></div>
-                <p>กำลังโหลดข้อมูล...</p>
-            </div>
-        );
-    }
+    const buildingType = invoice.service?.buildingType;
+    const houseNo = invoice.service?.houseNumber ? `บ้านเลขที่ ${invoice.service.houseNumber}` : '';
+    const villageNo = invoice.service?.villageNo ? ` ม.${invoice.service.villageNo}` : '';
 
     return (
-        <>
-            <div className="invoice-cards-list">
-                {invoices.map((inv) => (
-                    <div className="invoice-premium-card" key={inv.invoiceId}>
-                        {/* Top Section */}
-                        <div className="invoice-header-section">
-                            {/* Left Side: Details */}
-                            <div className="invoice-details-left">
-                                <div className="invoice-badge-title">
-                                    <svg className="invoice-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                        <polyline points="14 2 14 8 20 8" />
-                                        <line x1="16" y1="13" x2="8" y2="13" />
-                                        <line x1="16" y1="17" x2="8" y2="17" />
-                                        <polyline points="10 9 9 9 8 9" />
-                                    </svg>
-                                    <span>ใบแจ้งหนี้ปัจจุบัน</span>
-                                </div>
-                                <h2 className="invoice-month-title">
-                                    รอบเดือน {utils.getInvoiceMonthYear(inv.invoiceDate || inv.dueDate)}
-                                </h2>
-                                <div className="invoice-due-date-wrapper">
-                                    <span className="due-label">กำหนดชำระ</span>
-                                    <span className="due-value">
-                                        {utils.formatShortThaiDate(utils.convertCEtoBE(inv.dueDate))}
-                                    </span>
-                                </div>
-                            </div>
+        <div className="payment-checkout-container">
+            {/* ปุ่มย้อนกลับไปหน้ารายการ */}
+            <div className="payment-nav-back">
+                <button className="back-link-btn" onClick={onBack}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    <span>ย้อนกลับไปหน้ารายการบิล</span>
+                </button>
+            </div>
 
-                            {/* Right Side: Payment summary box */}
-                            <div className="invoice-summary-box">
-                                <div className="amount-pay-label">ยอดเงินที่ต้องชำระ</div>
-                                <div className="amount-pay-value">
-                                    <span className="currency-symbol">฿</span> {inv.totalAmount.toFixed(2)}
-                                </div>
+            {/* การ์ดรายละเอียดบิลที่เลือก */}
+            <div className="invoice-premium-card">
+                <div className="invoice-header-section">
+                    {/* ข้อมูลฝั่งซ้าย */}
+                    <div className="invoice-details-left">
+                        <div className="invoice-badge-title">
+                            <svg className="invoice-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                            </svg>
+                            <span>ใบแจ้งหนี้ที่ต้องชำระ</span>
+                        </div>
+                        <h2 className="invoice-month-title">
+                            รอบเดือน {utils.getInvoiceMonthYear(invoice.invoiceDate || invoice.dueDate)}
+                        </h2>
 
-                                <div className="payment-status-badge pending">
-                                    <span className="status-dot"></span>
-                                    <span>รอการชำระเงิน</span>
-                                </div>
-                                <label className={`upload-slip-btn ${uploadingInvoiceId === inv.invoiceId ? 'disabled' : ''}`}>
-                                    {uploadingInvoiceId === inv.invoiceId ? (
-                                        <>
-                                            <div className="btn-spinner"></div>
-                                            <span>กำลังตรวจสอบสลิป...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="17 8 12 3 7 8" />
-                                                <line x1="12" y1="3" x2="12" y2="15" />
-                                            </svg>
-                                            <span>แนบสลิป</span>
-                                        </>
-                                    )}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => verifyPayment(e, inv.invoiceId)}
-                                        className="hidden-file-input"
-                                        disabled={uploadingInvoiceId !== null}
-                                    />
-                                </label>
+                        {(buildingType || houseNo) && (
+                            <div className="invoice-property-info">
+                                <span className="property-label">ประเภทอาคาร</span>
+                                <span className="property-value">
+                                    {buildingType} {houseNo}{villageNo}
+                                </span>
                             </div>
+                        )}
+
+                        <div className="invoice-due-date-wrapper">
+                            <span className="due-label">กำหนดชำระ</span>
+                            <span className="due-value">
+                                {utils.formatShortThaiDate(utils.convertCEtoBE(invoice.dueDate))}
+                            </span>
                         </div>
                     </div>
-                ))}
+
+                    {/* กล่องยอดเงินและปุ่มแนบสลิปฝั่งขวา */}
+                    <div className="invoice-summary-box">
+                        <div className="amount-pay-label">ยอดเงินที่ต้องชำระ</div>
+                        <div className="amount-pay-value">
+                            <span className="currency-symbol"></span> {Number(invoice.totalAmount || 0).toFixed(2)}
+                        </div>
+
+                        <div className="payment-status-badge pending">
+                            <span className="status-dot"></span>
+                            <span>รอการชำระเงิน</span>
+                        </div>
+
+                        <label className={`upload-slip-btn ${uploading ? 'disabled' : ''}`}>
+                            {uploading ? (
+                                <>
+                                    <div className="btn-spinner"></div>
+                                    <span>กำลังตรวจสอบสลิป...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    <span>แนบสลิปเพื่อชำระเงิน</span>
+                                </>
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={verifyPayment}
+                                className="hidden-file-input"
+                                disabled={uploading}
+                            />
+                        </label>
+                    </div>
+                </div>
             </div>
-            {/* Bottom Section: Payment Channels */}
+
+            {/* การ์ดช่องทางการโอนเงิน */}
             <div className="payment-channels-container-card">
                 <h3 className="payment-channels-title">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -242,7 +234,7 @@ function MakePaymentOnline({ memberId, onPaymentSuccess }) {
                 </div>
             </div>
 
-            {/* API Status Messages */}
+            {/* ข้อความแจ้งเตือนสถานะ API */}
             {message && (
                 <div className={`invoice-toast-message ${isSuccess ? 'success' : 'error'}`}>
                     <div className="toast-icon">
@@ -261,7 +253,7 @@ function MakePaymentOnline({ memberId, onPaymentSuccess }) {
                     <div className="toast-text">{message}</div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 

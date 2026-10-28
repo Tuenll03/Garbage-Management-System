@@ -29,7 +29,12 @@ public class LoginService {
         // Find Officer
         DocumentOfficer officer = officerRepository.findByCitizenId(citizenId);
         if (officer != null) {
-            return officer.getPassword().equals(password) ? "Officer" : "Password not match";
+            if (officer.getStatus().equals("ทำงาน")) {
+                return officer.getPassword().equals(password) ? "Officer" : "Password not match";
+            } else {
+                return "Officer not working";
+            }
+
         }
 
         // Find Member

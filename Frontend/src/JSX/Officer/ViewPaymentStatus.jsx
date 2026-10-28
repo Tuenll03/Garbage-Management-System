@@ -17,9 +17,12 @@ function ViewPaymentStatus({ onNavigate }) {
 
     // Filter states
     const [selectedVillageNo, setSelectedVillageNo] = useState("ทั้งหมด");
-    const [selectedServiceType, setSelectedServiceType] = useState("ทั้งหมด");
-    const [selectedMonth, setSelectedMonth] = useState("ทั้งหมด");
+    const [selectedServiceType, setSelectedServiceType] = useState("ชำระรายเดือน");
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedStatus, setSelectedStatus] = useState("ทั้งหมด");
+    const [searchWord, setSearchWord] = useState("");
+    const [selectedBuildingType, setSelectedBuildingType] = useState("ทั้งหมด");
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
     useEffect(() => {
         const fetchOfficer = async () => {
@@ -97,8 +100,22 @@ function ViewPaymentStatus({ onNavigate }) {
         setSelectedStatus(e.target.value);
     };
 
+    const changeYear = (e) => {
+        setSelectedYear(e.target.value);
+    };
+    const changeBuildingType = (e) => {
+        setSelectedBuildingType(e.target.value);
+    };
+
     //ใช้ทำตัวกรองข้อมูล
     const viewPaymentStatus = invoices.filter(inv => {
+        // 1. ค้นหาตามข้อความ (ชื่อ, นามสกุล, หมู่ที่)
+        const word = searchWord.trim();
+        //เช็คว่าคำค้นหาว่างหรือไม่ถ้าว่างให้แสดงทั้งหมด
+        const matchesSearch = !word ||
+            (inv.service?.member?.firstName?.includes(word)) ||
+            (inv.service?.member?.lastName?.includes(word));
+
         // 1. Village filter
         const matchesVillage = selectedVillageNo === "ทั้งหมด" || inv.service?.villageNo === selectedVillageNo;
 
@@ -116,7 +133,11 @@ function ViewPaymentStatus({ onNavigate }) {
             inv.status === selectedStatus ||
             (selectedStatus === "ชำระแล้ว" && inv.status === "ชำระเงินแล้ว");
 
-        return matchesVillage && matchesServiceType && matchesMonth && matchesStatus;
+        const matchesYear = inv.invoiceDate?.startsWith(selectedYear);
+
+        const matchesBuildingType = selectedBuildingType === "ทั้งหมด" || inv.service?.buildingType === selectedBuildingType;
+
+        return matchesSearch && matchesVillage && matchesServiceType && matchesMonth && matchesStatus && matchesYear && matchesBuildingType;
     });
 
 
@@ -135,6 +156,14 @@ function ViewPaymentStatus({ onNavigate }) {
 
         return diffDays > 0 ? `${diffDays} วัน` : "ยังไม่เลยกำหนด";
     };
+
+    // ดึงเฉพาะปีที่มีอยู่จริงใน DB (invoices) แบบไม่ซ้ำ และเรียงจากปีล่าสุดลงไป
+    //คัดค่าซ้ำออก
+    const availableYears = [...new Set(
+        invoices
+            .map(inv => inv.invoiceDate ? new Date(inv.invoiceDate).getFullYear() : null)
+            .filter(Boolean)
+    )].sort((a, b) => b - a);
 
 
     const makeCustomerPayment = (invoiceId) => {
@@ -192,7 +221,7 @@ function ViewPaymentStatus({ onNavigate }) {
                         <span className="stat-card-number">{totalHousehold !== null && totalHousehold !== undefined ? totalHousehold.toLocaleString() : "-"}</span>
                     </div>
                     <div className="stat-card-item">
-                        <span className="stat-card-label">ชำระแล้ว (เดือนนี้)</span>
+                        <span className="stat-card-label">ชำระแล้ว </span>
                         <span className="stat-card-number success-text">{paymentsSuccess !== null && paymentsSuccess !== undefined ? paymentsSuccess.toLocaleString() : "-"}</span>
                     </div>
                     <div className="stat-card-item">
@@ -204,8 +233,17 @@ function ViewPaymentStatus({ onNavigate }) {
                 {/* Filters Row */}
                 <div className="filters-card-container">
                     <div className="dropdown-filters-wrapper">
+                        <div className="search-input-wrapper">
+                            <input
+                                type="text"
+                                className="search-input-field"
+                                value={searchWord}
+                                onChange={(e) => setSearchWord(e.target.value)}
+                                placeholder="ค้นหาชื่อ, ที่อยู่..."
+                            />
+                        </div>
                         <select className="filter-select-input" value={selectedVillageNo} onChange={changeVillageNo}>
-                            <option value="ทั้งหมด">หมู่บ้าน (ทั้งหมด)</option>
+                            <option value="ทั้งหมด">หมู่บ้าน </option>
                             <option value="1">หมู่ 1</option>
                             <option value="2">หมู่ 2</option>
                             <option value="3">หมู่ 3</option>
@@ -213,13 +251,13 @@ function ViewPaymentStatus({ onNavigate }) {
                         </select>
 
                         <select className="filter-select-input" value={selectedServiceType} onChange={changeServiceType}>
-                            <option value="ทั้งหมด">ประเภทบริการ (ทั้งหมด)</option>
+                            <option value="ทั้งหมด">ประเภทบริการ </option>
                             <option value="ชำระรายเดือน">เดือน</option>
                             <option value="ชำระรายปี">ปี</option>
                         </select>
 
                         <select className="filter-select-input" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-                            <option value="ทั้งหมด">เดือน (ทั้งหมด)</option>
+                            <option value="ทั้งหมด">เดือนทั้งหมด </option>
                             <option value="1">มกราคม</option>
                             <option value="2">กุมภาพันธ์</option>
                             <option value="3">มีนาคม</option>
@@ -234,8 +272,23 @@ function ViewPaymentStatus({ onNavigate }) {
                             <option value="12">ธันวาคม</option>
                         </select>
 
+                        <select className="filter-select-input" value={selectedYear} onChange={changeYear}>
+                            {availableYears.map((year) => (
+                                <option key={year} value={year}>
+                                    {year + 543}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select className="filter-select-input" value={selectedBuildingType} onChange={changeBuildingType}>
+                            <option value="ทั้งหมด">ประเภทอาคาร </option>
+                            <option value="บ้านพัก">บ้านพักอาศัย</option>
+                            <option value="ร้านค้า/ร้านอาหาร">ร้านค้า/ร้านอาหาร</option>
+                            <option value="อาคารพาณิชย์">อาคารพาณิชย์</option>
+                        </select>
+
                         <select className="filter-select-input" value={selectedStatus} onChange={changeStatus}>
-                            <option value="ทั้งหมด">สถานะการชำระ (ทั้งหมด)</option>
+                            <option value="ทั้งหมด">สถานะการชำระทั้งหมด</option>
                             <option value="ชำระแล้ว">ชำระแล้ว</option>
                             <option value="ค้างชำระ">ค้างชำระ</option>
                         </select>
@@ -247,18 +300,19 @@ function ViewPaymentStatus({ onNavigate }) {
                     <table className="payments-custom-table">
                         <thead>
                             <tr>
-                                <th className="col-name-16">ชื่อ</th>
-                                <th className="col-name-16">นามสกุล</th>
+                                <th className="col-name-14">ชื่อ</th>
+                                <th className="col-name-14">นามสกุล</th>
                                 <th className="col-village-12">หมู่บ้าน</th>
+                                <th className="col-building-16">ประเภทอาคาร</th>
                                 <th className="col-overdue-16">จำนวนวันที่ค้างชำระ</th>
-                                <th className="col-status-16">สถานะการชำระ</th>
-                                <th className="col-action-12">ชำระเงิน</th>
+                                <th className="col-status-14">สถานะการชำระ</th>
+                                <th className="col-action-14">ชำระเงิน</th>
                             </tr>
                         </thead>
                         <tbody>
                             {viewPaymentStatus.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="empty-table-row">
+                                    <td colSpan="7" className="empty-table-row">
                                         ไม่พบข้อมูล
                                     </td>
                                 </tr>
@@ -276,6 +330,11 @@ function ViewPaymentStatus({ onNavigate }) {
                                             <td className="name-bold-cell">{inv.service?.member?.firstName || '-'}</td>
                                             <td className="name-bold-cell">{inv.service?.member?.lastName || '-'}</td>
                                             <td>{inv.service?.villageNo ? `หมู่ ${inv.service.villageNo}` : '-'}</td>
+                                            <td>
+                                                <span className="building-type-pill">
+                                                    {inv.service?.buildingType || '-'}
+                                                </span>
+                                            </td>
                                             <td className={`overdue-days-cell ${isOverdue ? 'danger' : ''}`}>
                                                 {overdueText}
                                             </td>

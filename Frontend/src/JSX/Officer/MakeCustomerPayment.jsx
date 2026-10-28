@@ -6,17 +6,18 @@ import '../../CSS/MakeCustomerPayment.css';
 function MakeCustomerPayment({ onNavigate }) {
     const [officer, setOfficer] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [invoice, setInvoice] = useState(null);
-    const [service, setService] = useState(null);
+
+
     const [member, setMember] = useState(null);
     const [paidInvoice, setPaidInvoice] = useState([]);
     const [message, setMessage] = useState(null);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [unpaidInvoices, setUnpaidInvoices] = useState([]);
+    const [selectedInvoiceIds, setSelectedInvoiceIds] = useState([]);
 
-
-    // Form inputs
     const [amountPaid, setAmountPaid] = useState("");
-    const [paymentDate, setPaymentDate] = useState('');
+    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // 1. Fetch Officer login state 
     useEffect(() => {
@@ -45,8 +46,6 @@ function MakeCustomerPayment({ onNavigate }) {
         fetchOfficer();
     }, [onNavigate]);
 
-
-
     // ดึงข้อมูลบิลที่เลือกชำระ
     useEffect(() => {
         const storedServiceId = sessionStorage.getItem('selectedServiceId');
@@ -58,9 +57,6 @@ function MakeCustomerPayment({ onNavigate }) {
                 const currentInvoice = response.data;
 
                 if (currentInvoice) {
-                    setInvoice(currentInvoice);
-                    setAmountPaid(currentInvoice.totalAmount);
-                    setService(currentInvoice.service);
                     setMember(currentInvoice.service?.member);
                     const memberId = currentInvoice.service?.member?.memberId;
                     viewPaymentHistory(memberId);
@@ -76,19 +72,36 @@ function MakeCustomerPayment({ onNavigate }) {
             try {
                 if (memberId) {
                     const historyRes = await axios.get(`/api/invoices/member/${memberId}`);
+
+                    // 1. บิลที่ชำระแล้ว 
                     const paidList = historyRes.data.filter(
                         inv => inv.status === 'ชำระเงินแล้ว' || inv.status === 'ชำระแล้ว'
                     );
                     setPaidInvoice(paidList);
-                }
 
+
+                    // 2. บิลที่ค้างชำระ 
+                    const unpaidList = historyRes.data.filter(
+                        inv => inv.status === 'ค้างชำระ'
+                    );
+                    setUnpaidInvoices(unpaidList);
+
+
+                    // 3. ตั้งค่าเริ่มต้น: ติ๊กเลือกทุกบิล และ คำนวณยอดเงินรวม
+                    setSelectedInvoiceIds(unpaidList.map(inv => inv.invoiceId));
+                    const total = unpaidList.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+                    setAmountPaid(total);
+                }
             } catch (error) {
-                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์')
+                setMessage('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
             }
         }
 
         viewPayment();
     }, []);
+
+
+
 
     useEffect(() => {
         if (message) {
@@ -98,36 +111,87 @@ function MakeCustomerPayment({ onNavigate }) {
     }, [message]);
 
 
-    // 3. บันทึกการชำระเงินสด
-    const makeCustomerPayment = async (e) => {
-        e.preventDefault();
+    // เมื่อกดติ๊ก "เลือกทั้งหมด"
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = unpaidInvoices.map(inv => inv.invoiceId);
+            setSelectedInvoiceIds(allIds);
+            const total = unpaidInvoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+            setAmountPaid(total);
+        } else {
+            setSelectedInvoiceIds([]);
+            setAmountPaid(0);
+        }
+    };
+    // เมื่อกดติ๊ก "เลือกทีละบิล"
+    const handleToggleInvoice = (invoiceId) => {
+        setSelectedInvoiceIds(prev => {
+            const updated = prev.includes(invoiceId)
+                ? prev.filter(id => id !== invoiceId)
+                : [...prev, invoiceId];
+            // คำนวณยอดเงินรวมใหม่ตามบิลที่ยังติ๊กอยู่
+            const total = unpaidInvoices
+                .filter(inv => updated.includes(inv.invoiceId))
+                .reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+            setAmountPaid(total);
+            return updated;
+        });
+    };
 
-        const paymentData = {
-            amountPaid: amountPaid,
-            paymentDate: paymentDate,
-            paymentMethod: 'เงินสด',
-            invoice: {
-                invoiceId: invoice.invoiceId
-            }
-        };
+
+    // 3. เปิด Modal ยืนยันการชำระเงิน
+    const handleOpenConfirmModal = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+
+        if (selectedInvoiceIds.length === 0) {
+            setMessage("กรุณาเลือกอย่างน้อย 1 บิลที่ต้องการชำระ");
+            return;
+        }
+
+        if (!paymentDate) {
+            setMessage("กรุณาระบุวันที่ชำระเงิน");
+            return;
+        }
+
+        setShowConfirmModal(true);
+    };
+
+    // 4. บันทึกการชำระเงินสดจริงหลังกดยืนยันใน Modal
+    const makeCustomerPayment = async () => {
+        setShowConfirmModal(false);
 
         try {
-            const response = await axios.post('/api/payments/officer', paymentData);
+            // วนลูปยิงบันทึกชำระเงินทุกบิลที่ติ๊กเลือกพร้อมกัน
+            const paymentPromises = selectedInvoiceIds.map(invoiceId => {
+                const currentInv = unpaidInvoices.find(i => i.invoiceId === invoiceId);
+                return axios.post('/api/payments/officer', {
+                    amountPaid: currentInv ? currentInv.totalAmount : 0,
+                    paymentDate: paymentDate,
+                    paymentMethod: 'เงินสด',
+                    invoice: { invoiceId: invoiceId }
+                });
+            });
+            const responses = await Promise.all(paymentPromises);
+            const allSuccess = responses.every(res => res.data === "successfully");
 
-            if (response.data == "successfully") {
+            if (allSuccess) {
                 setMessage("ยืนยันรับชำระเงินสดสำเร็จ!");
                 setIsSuccess(true);
 
-                //อัพเดทสถานะใบแจ้งหนี้เป็น ชำระเงินแล้ว
-                setInvoice(prev => prev ? { ...prev, status: 'ชำระเงินแล้ว' } : null);
+                // เคลียร์บิลที่เพิ่งจ่ายออกจากรายการค้างชำระ
+                const remainingUnpaid = unpaidInvoices.filter(inv => !selectedInvoiceIds.includes(inv.invoiceId));
+                setUnpaidInvoices(remainingUnpaid);
+                setSelectedInvoiceIds(remainingUnpaid.map(i => i.invoiceId));
+                const remainingTotal = remainingUnpaid.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+                setAmountPaid(remainingTotal);
 
-                //อัพเดทประวัติการชำระเงิน
+                // อัพเดทประวัติการชำระเงินฝั่งขวา
                 const memberId = member?.memberId;
                 if (memberId) {
                     const historyRes = await axios.get(`/api/invoices/member/${memberId}`);
                     const paidList = historyRes.data.filter(
                         inv => inv.status === 'ชำระเงินแล้ว' || inv.status === 'ชำระแล้ว'
-                    );
+                    ).sort((a, b) => new Date(b.invoiceDate) - new Date(a.invoiceDate));
                     setPaidInvoice(paidList);
                 }
             } else {
@@ -143,7 +207,6 @@ function MakeCustomerPayment({ onNavigate }) {
 
     const officerName = officer ? `${officer.prefix || ''}${officer.firstName} ${officer.lastName}` : "ไม่ระบุชื่อ";
     const memberName = member ? `${member.prefix || ''}${member.firstName} ${member.lastName}` : "ไม่ระบุชื่อ";
-    const formattedId = service ? `SV-${String(service.serviceId).padStart(5, '0')}` : "SV-00000";
 
     if (loading) {
         return (
@@ -154,7 +217,7 @@ function MakeCustomerPayment({ onNavigate }) {
         );
     }
 
-    const hasOverdue = invoice?.status === 'ค้างชำระ';
+    const hasOverdue = unpaidInvoices.length > 0;
 
     return (
         <div className="verify-payments-wrapper">
@@ -213,68 +276,93 @@ function MakeCustomerPayment({ onNavigate }) {
                         </div>
 
                         {/* Form Body */}
-                        {invoice ? (
-                            <form className="cash-payment-form" onSubmit={makeCustomerPayment}>
-                                <div className="form-fields-row">
-                                    <div className="form-group-item">
-                                        <label className="form-label-text">เดือนที่ชำระ</label>
-                                        <select
-                                            className="filter-select-input full-width-select"
-                                            disabled
-                                        >
-                                            <option>
-                                                {invoice ? utils.getInvoiceMonthYear(invoice.invoiceDate || invoice.dueDate) : ""}
-                                            </option>
-                                        </select>
-                                    </div>
+                        {member ? (
+                            <form className="cash-payment-form" onSubmit={handleOpenConfirmModal}>
+                                {/* รายการบิลค้างชำระ (สะอาด เรียบร้อย ไม่มีสติกเกอร์/อิโมจิ) */}
+                                <div className="unpaid-bill-section">
+                                    <span className="unpaid-bill-section-title">
+                                        รายการบิลค้างชำระ
+                                    </span>
 
-                                    <div className="form-group-item">
-                                        <label className="form-label-text">จำนวนเงิน (บาท)</label>
-                                        <input
-                                            type="number"
-                                            className="cash-amount-input"
-                                            value={amountPaid}
-                                            onChange={(e) => setAmountPaid(e.target.value)}
-                                            placeholder="0"
-                                            disabled={!hasOverdue}
-                                            required
-                                        />
+                                    <div className="unpaid-bill-container">
+                                        {unpaidInvoices.length > 0 ? (
+                                            <>
+                                                <div className="unpaid-bill-header">
+                                                    <label className="unpaid-select-all-label">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="custom-checkbox"
+                                                            checked={selectedInvoiceIds.length > 0 && selectedInvoiceIds.length === unpaidInvoices.length}
+                                                            onChange={handleSelectAll}
+                                                        />
+                                                        <span>
+                                                            เลือกทั้งหมด {selectedInvoiceIds.length}/{unpaidInvoices.length} บิล
+                                                        </span>
+                                                    </label>
+                                                </div>
+
+                                                <div className="unpaid-bill-list">
+                                                    {unpaidInvoices.map((inv) => {
+                                                        const isChecked = selectedInvoiceIds.includes(inv.invoiceId);
+                                                        const isYearly = inv.service?.serviceType === "ชำระรายปี";
+                                                        const periodText = isYearly
+                                                            ? `ประจำปี ${new Date(inv.dueDate).getFullYear() + 543}`
+                                                            : utils.getInvoiceMonthYear(inv.dueDate);
+
+                                                        return (
+                                                            <div
+                                                                key={inv.invoiceId}
+                                                                className={`unpaid-bill-item ${isChecked ? 'active' : ''}`}
+                                                                onClick={() => handleToggleInvoice(inv.invoiceId)}
+                                                            >
+                                                                <div className="unpaid-bill-info">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="custom-checkbox"
+                                                                        checked={isChecked}
+                                                                        onChange={() => { }}
+                                                                    />
+                                                                    <span className={`bill-type-tag ${isYearly ? 'yearly' : 'monthly'}`}>
+                                                                        {isYearly ? 'รายปี' : 'รายเดือน'}
+                                                                    </span>
+                                                                    <span className="unpaid-bill-period">
+                                                                        {periodText}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="unpaid-bill-amount">
+                                                                    {Number(inv.totalAmount || 0).toFixed(2)} บาท
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="unpaid-bill-empty">
+                                                ไม่มีรายการบิลค้างชำระ
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                <div className="form-group-item full-width-group">
-                                    <label className="form-label-text">วันที่ชำระเงิน</label>
-                                    <div
-                                        className={`cash-date-picker-box ${!hasOverdue ? 'disabled' : ''}`}
-                                        onClick={() => {
-                                            if (!hasOverdue) return;
-                                            const el = document.getElementById('paymentDatePicker');
-                                            if (el && el.showPicker) el.showPicker();
-                                        }}
-                                    >
-                                        <span className={`cash-date-picker-text ${!paymentDate ? 'placeholder' : ''}`}>
-                                            {paymentDate
-                                                ? utils.formatShortThaiDate(utils.convertCEtoBE(paymentDate))
-                                                : "คลิกเพื่อเลือกวันที่ชำระเงิน..."}
-                                        </span>
-                                        <span className="cash-date-picker-icon">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                                <line x1="16" y1="2" x2="16" y2="6" />
-                                                <line x1="8" y1="2" x2="8" y2="6" />
-                                                <line x1="3" y1="10" x2="21" y2="10" />
-                                            </svg>
-                                        </span>
+                                <div className="form-fields-row">
+                                    <div className="form-group-item">
+                                        <label className="form-label-text">ยอดรวมที่ต้องชำระ (บาท)</label>
                                         <input
-                                            type="date"
-                                            id="paymentDatePicker"
-                                            value={paymentDate}
-                                            onChange={(e) => setPaymentDate(e.target.value)}
-                                            disabled={!hasOverdue}
-                                            //  กำหนดให้เลือกได้แค่วันปัจจุบัน 
-                                            min={new Date().toISOString().split('T')[0]}
-                                            max={new Date().toISOString().split('T')[0]}
-                                            className="cash-date-picker-hidden-input"
+                                            type="text"
+                                            className="cash-amount-input read-only-box"
+                                            value={Number(amountPaid || 0).toFixed(2)}
+                                            readOnly
+                                        />
+                                    </div>
+
+                                    <div className="form-group-item">
+                                        <label className="form-label-text">วันที่ชำระเงิน</label>
+                                        <input
+                                            type="text"
+                                            className="cash-amount-input read-only-box"
+                                            value={utils.formatShortThaiDate(utils.convertCEtoBE(paymentDate))}
+                                            readOnly
                                         />
                                     </div>
                                 </div>
@@ -283,14 +371,16 @@ function MakeCustomerPayment({ onNavigate }) {
                                 <button
                                     type="submit"
                                     className="confirm-cash-payment-btn"
-                                    disabled={!hasOverdue}
+                                    disabled={!hasOverdue || selectedInvoiceIds.length === 0}
                                 >
                                     <div className="checkmark-circle-icon">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
                                     </div>
-                                    ยืนยันการรับชำระเงินสด
+                                    <span>
+                                        ยืนยันการรับชำระเงินสด
+                                    </span>
                                 </button>
 
                                 {/* กล่องแจ้งเตือนใต้ปุ่ม */}
@@ -326,12 +416,13 @@ function MakeCustomerPayment({ onNavigate }) {
                                         <th className="col-history-member">สมาชิก</th>
                                         <th className="col-history-amount">ยอดเงิน</th>
                                         <th className="col-history-month">เดือน</th>
+                                        <th className="col-history-action">เอกสาร</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paidInvoice.length === 0 ? (
                                         <tr>
-                                            <td colSpan="3" className="history-empty-row">
+                                            <td colSpan="4" className="history-empty-row">
                                                 ไม่มีประวัติการชำระเงิน
                                             </td>
                                         </tr>
@@ -344,6 +435,14 @@ function MakeCustomerPayment({ onNavigate }) {
                                                 </td>
                                                 <td className="history-month-cell">
                                                     {utils.getInvoiceMonthYear(inv.invoiceDate || inv.dueDate)}
+                                                </td>
+                                                <td className="history-action-cell">
+                                                    <button
+                                                        className="view-receipt-btn"
+                                                        onClick={() => window.open(`/api/invoices/${inv.invoiceId}/pdf`, '_blank')}
+                                                    >
+                                                        ดูใบเสร็จ
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))
@@ -358,6 +457,60 @@ function MakeCustomerPayment({ onNavigate }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal ยืนยันการรับชำระเงินสด */}
+            {showConfirmModal && (
+                <div className="payment-modal-overlay">
+                    <div className="payment-modal-box">
+                        <div className="payment-modal-header">
+                            <div className="payment-modal-icon-wrapper">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                            <h3 className="payment-modal-title">ยืนยันการรับชำระเงินสด</h3>
+                            <p className="payment-modal-subtitle">กรุณาตรวจสอบยอดเงินสดที่ได้รับให้ถูกต้องก่อนกดยืนยัน</p>
+                        </div>
+
+                        <div className="payment-modal-body">
+                            <div className="modal-summary-row">
+                                <span className="summary-label">ชื่อสมาชิก:</span>
+                                <span className="summary-value font-bold">{memberName}</span>
+                            </div>
+                            <div className="modal-summary-row">
+                                <span className="summary-label">จำนวนบิลที่ชำระ:</span>
+                                <span className="summary-value">{selectedInvoiceIds.length} รายการ</span>
+                            </div>
+                            <div className="modal-summary-row">
+                                <span className="summary-label">วันที่รับชำระ:</span>
+                                <span className="summary-value">{utils.formatShortThaiDate(utils.convertCEtoBE(paymentDate))}</span>
+                            </div>
+                            <div className="modal-summary-divider"></div>
+                            <div className="modal-summary-row total-row">
+                                <span className="summary-label">ยอดเงินสดที่ต้องรับ:</span>
+                                <span className="summary-value total-amount">{Number(amountPaid || 0).toFixed(2)} บาท</span>
+                            </div>
+                        </div>
+
+                        <div className="payment-modal-footer">
+                            <button
+                                type="button"
+                                className="modal-cancel-btn"
+                                onClick={() => setShowConfirmModal(false)}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                type="button"
+                                className="modal-confirm-btn"
+                                onClick={makeCustomerPayment}
+                            >
+                                ยืนยันรับชำระเงิน
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

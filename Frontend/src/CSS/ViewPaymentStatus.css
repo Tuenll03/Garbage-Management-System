@@ -685,10 +685,26 @@
 .col-history-month { width: 30%; text-align: right; }
 
 .col-name-16 { width: 18%; }
-.col-village-12 { width: 15%; }
-.col-overdue-16 { width: 18%; }
+.col-village-12 { width: 12%; }
+.col-overdue-16 { width: 16%; }
 .col-status-16 { width: 17%; }
 .col-action-12 { width: 14%; text-align: center; }
+
+/* 7-Column Layout Utilities */
+.col-name-14 { width: 14%; }
+.col-building-16 { width: 16%; }
+.col-status-14 { width: 14%; }
+.col-action-14 { width: 14%; text-align: center; }
+
+.building-type-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    background-color: #f1f5f9;
+    color: #475569;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
 
 .navbar-brand-clickable {
     cursor: pointer;
