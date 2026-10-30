@@ -1,0 +1,100 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# Apache Maven Wrapper startup shell script, version 3.3.4
+# ----------------------------------------------------------------------------
+
+set -e
+
+PRG="$0"
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+saveddir=`pwd`
+BASE_DIR=`dirname "$PRG"`
+cd "$BASE_DIR"
+BASE_DIR=`pwd`
+cd "$saveddir"
+
+PROPERTIES_FILE="$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
+
+if [ ! -f "$PROPERTIES_FILE" ]; then
+  echo "Error: Cannot find $PROPERTIES_FILE" >&2
+  exit 1
+fi
+
+distributionUrl=$(grep "^distributionUrl=" "$PROPERTIES_FILE" | cut -d'=' -f2-)
+
+if [ -z "$distributionUrl" ]; then
+  echo "Error: distributionUrl not found in $PROPERTIES_FILE" >&2
+  exit 1
+fi
+
+USER_HOME="${HOME:-$USERPROFILE}"
+MAVEN_USER_HOME="${MAVEN_USER_HOME:-$USER_HOME/.m2}"
+WRAPPER_DIR="$MAVEN_USER_HOME/wrapper/dists"
+
+if command -v sha256sum >/dev/null 2>&1; then
+  DIST_HASH=$(printf '%s' "$distributionUrl" | sha256sum | cut -d' ' -f1)
+elif command -v shasum >/dev/null 2>&1; then
+  DIST_HASH=$(printf '%s' "$distributionUrl" | shasum -a 256 | cut -d' ' -f1)
+elif command -v md5sum >/dev/null 2>&1; then
+  DIST_HASH=$(printf '%s' "$distributionUrl" | md5sum | cut -d' ' -f1)
+else
+  DIST_HASH="default"
+fi
+
+TARGET_DIR="$WRAPPER_DIR/$DIST_HASH"
+
+MVN_BIN=""
+if [ -d "$TARGET_DIR" ]; then
+  MVN_BIN=$(find "$TARGET_DIR" -maxdepth 2 -name "mvn" -type f 2>/dev/null | head -n 1)
+fi
+
+if [ -z "$MVN_BIN" ] || [ ! -x "$MVN_BIN" ]; then
+  echo "Downloading Maven from $distributionUrl ..."
+  mkdir -p "$TARGET_DIR"
+  ZIP_FILE="$WRAPPER_DIR/$DIST_HASH.zip"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$distributionUrl" -o "$ZIP_FILE"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$distributionUrl" -O "$ZIP_FILE"
+  else
+    echo "Error: curl or wget is required to download Maven" >&2
+    exit 1
+  fi
+
+  unzip -qo "$ZIP_FILE" -d "$TARGET_DIR"
+  rm -f "$ZIP_FILE"
+
+  MVN_BIN=$(find "$TARGET_DIR" -maxdepth 2 -name "mvn" -type f | head -n 1)
+  chmod +x "$MVN_BIN"
+fi
+
+exec "$MVN_BIN" "$@"
+
